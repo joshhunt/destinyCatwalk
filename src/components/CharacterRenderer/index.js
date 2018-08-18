@@ -169,6 +169,7 @@ export default class CharacterRenderer extends Component {
     this.renderScene();
 
     this.loadItem();
+    // this.loadItem(2158678429);
   }
 
   onLoadCallback = (...args) => {
@@ -183,7 +184,7 @@ export default class CharacterRenderer extends Component {
     console.log('onErrorCallback', ...args);
   };
 
-  loadItem() {
+  loadItem(itemHash) {
     THREE.TGXLoader.Game = 'destiny2';
     THREE.TGXLoader.Platform = 'mobile';
     THREE.TGXLoader.APIKey = process.env.REACT_APP_API_KEY; // https://www.bungie.net/en/Application
@@ -202,68 +203,82 @@ export default class CharacterRenderer extends Component {
       this.onErrorCallback
     );
 
-    const item = this.props.DestinyInventoryItemDefinition[this.itemHash];
+    const item = this.props.DestinyInventoryItemDefinition[2158678429];
 
-    loader.load(this.itemHash, (geometry, materials) => {
-      const mesh = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
+    loader.load(
+      {
+        itemHashes: [
+          545021994, // helmet
+          2158678429, // robes
+          550583155, // arms
+          285537093, // boots
+          3620666320 // bond
+        ]
+      },
+      (geometry, materials) => {
+        const mesh = new THREE.Mesh(
+          geometry,
+          new THREE.MultiMaterial(materials)
+        );
 
-      mesh.geometry.computeBoundingBox();
-      const bounds = mesh.geometry.boundingBox;
+        mesh.geometry.computeBoundingBox();
+        const bounds = mesh.geometry.boundingBox;
 
-      const isArmor = item.itemCategoryHashes.includes(20);
-      const isShip = item.itemCategoryHashes.includes(42);
-      const isSparrow = item.itemCategoryHashes.includes(43);
-      const isGhost = item.itemCategoryHashes.includes(39);
-      const isSword = item.itemCategoryHashes.includes(54);
+        const isArmor = item.itemCategoryHashes.includes(20);
+        const isShip = item.itemCategoryHashes.includes(42);
+        const isSparrow = item.itemCategoryHashes.includes(43);
+        const isGhost = item.itemCategoryHashes.includes(39);
+        const isSword = item.itemCategoryHashes.includes(54);
 
-      let scale = 100;
+        let scale = 100;
 
-      let width = bounds.max.x - bounds.min.x;
-      let height = bounds.max.z - bounds.min.z;
+        let width = bounds.max.x - bounds.min.x;
+        let height = bounds.max.z - bounds.min.z;
 
-      const toRadian = Math.PI / 180;
+        const toRadian = Math.PI / 180;
 
-      mesh.rotation.z = -180 * toRadian;
+        mesh.rotation.z = -180 * toRadian;
 
-      if (isArmor) {
-        mesh.rotation.z = -120 * toRadian;
-        scale = 50;
-      }
-      if (isGhost) {
-        scale = 250;
-      }
-      if (isShip) {
-        scale = 4;
-        mesh.rotation.z = -120 * toRadian;
-      }
-      if (isSparrow) {
-        scale = 20;
-        mesh.rotation.z = -130 * toRadian;
-      }
-      if (isSword) {
-        mesh.rotation.y = 90 * 1.1 * toRadian;
-        mesh.rotation.z = 0;
+        if (isArmor) {
+          mesh.rotation.z = -120 * toRadian;
+          scale = 50;
+        }
+        if (isGhost) {
+          scale = 250;
+        }
+        if (isShip) {
+          scale = 4;
+          mesh.rotation.z = -120 * toRadian;
+        }
+        if (isSparrow) {
+          scale = 20;
+          mesh.rotation.z = -130 * toRadian;
+        }
+        if (isSword) {
+          mesh.rotation.y = 90 * 1.1 * toRadian;
+          mesh.rotation.z = 0;
 
-        width = bounds.max.z - bounds.min.z;
-        height = bounds.max.x - bounds.min.x;
-        //depth = bounds.max.y-bounds.min.y;
-        mesh.position.x -= width / 2 * 1.5 * scale;
-      }
+          width = bounds.max.z - bounds.min.z;
+          height = bounds.max.x - bounds.min.x;
+          //depth = bounds.max.y-bounds.min.y;
+          mesh.position.x -= width / 2 * 1.5 * scale;
+        }
 
-      mesh.scale.set(scale, scale, scale);
-      mesh.rotation.x = -90 * toRadian;
+        mesh.scale.set(scale, scale, scale);
+        mesh.rotation.x = -90 * toRadian;
 
-      mesh.position.x += (bounds.min.x + width / 2) * scale;
-      mesh.position.y += -(bounds.min.z + height / 2) * scale;
+        mesh.position.x += (bounds.min.x + width / 2) * scale;
+        mesh.position.y += -(bounds.min.z + height / 2) * scale;
 
-      this.scene.add(mesh);
+        this.scene.add(mesh);
 
-      this.renderScene();
-
-      setTimeout(() => {
         this.renderScene();
-      });
-    });
+
+        setTimeout(() => {
+          this.renderScene();
+        });
+      }
+    );
 
     this.renderScene();
   }
