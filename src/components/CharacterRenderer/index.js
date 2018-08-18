@@ -231,18 +231,11 @@ export default class CharacterRenderer extends Component {
       let height = bounds.max.z - bounds.min.z;
 
       const toRadian = Math.PI / 180;
-      // const scale = 26;
-
-      // mesh.scale.set(scale, scale, scale);
 
       mesh.rotation.x = -90 * toRadian;
       mesh.rotation.z = -90 * toRadian;
 
-      // mesh.position.x += width / 2 * scale;
-      // mesh.position.y += -(height / 3) * scale;
-
       this.scene.add(mesh);
-
       this.renderScene();
 
       setTimeout(() => {
