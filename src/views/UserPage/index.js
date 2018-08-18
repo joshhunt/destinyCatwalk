@@ -1,8 +1,15 @@
 import React, { Component } from 'react';
 import cx from 'classnames';
+import { isArray, intersection } from 'lodash';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 
+import {
+  CLASSES,
+  SHADER,
+  WEAPON_MODS_ORNAMENTS,
+  ARMOR_MODS_ORNAMENTS
+} from 'app/lib/destinyEnums';
 import { getProfile } from 'src/store/clan';
 import Character from 'src/components/Character';
 import CharacterEquipment from 'src/components/CharacterEquipment';
@@ -12,6 +19,20 @@ import s from './styles.styl';
 
 const k = ({ membershipType, membershipId }) =>
   [membershipType, membershipId].join(':');
+
+function findSocketOfType(itemDefs, sockets, _types) {
+  const types = isArray(_types) ? _types : [_types];
+
+  const found = sockets.find(socket => {
+    const plugItem = itemDefs[socket.plugHash];
+
+    return (
+      plugItem && intersection(plugItem.itemCategoryHashes, types).length > 0
+    );
+  });
+
+  return found && found.plugHash;
+}
 
 class UserPage extends Component {
   state = { currentCharacter: null };
@@ -56,6 +77,33 @@ class UserPage extends Component {
       DestinyInventoryItemDefinition
     } = this.props;
 
+    const setup =
+      currentCharacterEquipment &&
+      DestinyInventoryItemDefinition &&
+      currentCharacterEquipment.items.map(itemInstance => {
+        const instanceData =
+          profile.itemComponents.sockets.data[itemInstance.itemInstanceId];
+        const sockets = (instanceData && instanceData.sockets) || [];
+
+        const shaderHash = findSocketOfType(
+          DestinyInventoryItemDefinition,
+          sockets,
+          [SHADER]
+        );
+
+        const ornamentHash = findSocketOfType(
+          DestinyInventoryItemDefinition,
+          sockets,
+          [WEAPON_MODS_ORNAMENTS, ARMOR_MODS_ORNAMENTS]
+        );
+
+        return {
+          ...itemInstance,
+          shaderHash,
+          ornamentHash
+        };
+      });
+
     return (
       <div className={s.root}>
         <h2>{this.renderName()}</h2>
@@ -91,7 +139,7 @@ class UserPage extends Component {
               DestinyInventoryItemDefinition && (
                 <CharacterRenderer
                   key={activeCharacterId}
-                  equipment={currentCharacterEquipment}
+                  equipment={setup}
                   DestinyGearAssetsDefinition={DestinyGearAssetsDefinition}
                   DestinyInventoryItemDefinition={
                     DestinyInventoryItemDefinition

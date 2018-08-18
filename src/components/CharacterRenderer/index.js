@@ -180,14 +180,14 @@ export default class CharacterRenderer extends Component {
 
     this.renderScene();
 
-    const buckets = keyBy(this.props.equipment.items, item => item.bucketHash);
+    const buckets = keyBy(this.props.equipment, item => item.bucketHash);
     [
-      buckets[BUCKET_ARMOR_HEAD].itemHash,
-      buckets[BUCKET_ARMOR_ARMS].itemHash,
-      buckets[BUCKET_ARMOR_CHEST].itemHash,
-      buckets[BUCKET_ARMOR_LEGS].itemHash,
-      buckets[BUCKET_ARMOR_CLASS_ITEM].itemHash
-    ].forEach(itemHash => this.loadItem(itemHash));
+      buckets[BUCKET_ARMOR_HEAD],
+      buckets[BUCKET_ARMOR_ARMS],
+      buckets[BUCKET_ARMOR_CHEST],
+      buckets[BUCKET_ARMOR_LEGS],
+      buckets[BUCKET_ARMOR_CLASS_ITEM]
+    ].forEach(item => this.loadItem(item));
   }
 
   onLoadCallback = (...args) => {
@@ -202,7 +202,7 @@ export default class CharacterRenderer extends Component {
     console.log('onErrorCallback', ...args);
   };
 
-  loadItem(itemHash) {
+  loadItem(item) {
     THREE.TGXLoader.Game = 'destiny2';
     THREE.TGXLoader.Platform = 'mobile';
     THREE.TGXLoader.APIKey = process.env.REACT_APP_API_KEY; // https://www.bungie.net/en/Application
@@ -221,28 +221,28 @@ export default class CharacterRenderer extends Component {
       this.onErrorCallback
     );
 
-    loader.load(itemHash, (geometry, materials) => {
-      const mesh = new THREE.Mesh(geometry, materials);
+    loader.load(
+      {
+        shaderHash: item.shaderHash,
+        ornamentHash: item.ornamentHash,
+        itemHash: item.itemHash
+      },
+      (geometry, materials) => {
+        const mesh = new THREE.Mesh(geometry, materials);
 
-      mesh.geometry.computeBoundingBox();
-      const bounds = mesh.geometry.boundingBox;
+        const toRadian = Math.PI / 180;
+        mesh.rotation.x = -90 * toRadian;
+        mesh.rotation.z = -90 * toRadian;
 
-      let width = bounds.max.x - bounds.min.x;
-      let height = bounds.max.z - bounds.min.z;
-
-      const toRadian = Math.PI / 180;
-
-      mesh.rotation.x = -90 * toRadian;
-      mesh.rotation.z = -90 * toRadian;
-
-      this.scene.add(mesh);
-      this.renderScene();
-
-      setTimeout(() => {
+        this.scene.add(mesh);
         this.renderScene();
-        this.setState({ loading: false });
-      });
-    });
+
+        setTimeout(() => {
+          this.renderScene();
+          this.setState({ loading: false });
+        });
+      }
+    );
 
     this.renderScene();
   }
