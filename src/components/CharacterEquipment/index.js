@@ -15,7 +15,6 @@ import {
 } from 'src/lib/destinyEnums';
 
 import Item from 'src/components/Item';
-import CharacterRenderer from 'src/components/CharacterRenderer';
 
 import s from './styles.styl';
 

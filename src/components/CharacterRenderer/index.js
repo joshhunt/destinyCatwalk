@@ -178,15 +178,13 @@ export default class CharacterRenderer extends Component {
     this.renderScene();
 
     const buckets = keyBy(this.props.equipment.items, item => item.bucketHash);
-    const loadout = [
+    [
       buckets[BUCKET_ARMOR_HEAD].itemHash,
       buckets[BUCKET_ARMOR_ARMS].itemHash,
       buckets[BUCKET_ARMOR_CHEST].itemHash,
       buckets[BUCKET_ARMOR_LEGS].itemHash,
       buckets[BUCKET_ARMOR_CLASS_ITEM].itemHash
     ].forEach(itemHash => this.loadItem(itemHash));
-
-    // this.loadItem(2158678429);
   }
 
   onLoadCallback = (...args) => {
