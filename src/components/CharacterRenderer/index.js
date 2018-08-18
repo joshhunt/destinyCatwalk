@@ -42,14 +42,14 @@ export default class CharacterRenderer extends Component {
       name: 'AmbientLight',
       type: 'ambient',
       color: 0xffffff,
-      intensity: 0.6
+      intensity: 0.8
     };
 
     const frontLight = {
       name: 'FrontLight',
       type: 'point',
       color: 0xffffff,
-      intensity: 0.8,
+      intensity: 0.4,
       position: [50, 100, 300],
       parent: 'camera'
     };
@@ -58,7 +58,7 @@ export default class CharacterRenderer extends Component {
       name: 'BackLight',
       type: 'point',
       color: 0xffffff,
-      intensity: 0.2,
+      intensity: 0.4,
       position: [-50, 100, -300],
       parent: 'camera'
     };
@@ -77,7 +77,7 @@ export default class CharacterRenderer extends Component {
       name: 'TopLight',
       type: 'point',
       color: 0xffffff,
-      intensity: 1,
+      intensity: 0.8,
       position: [0, 300, 0],
       parent: 'camera'
     };
