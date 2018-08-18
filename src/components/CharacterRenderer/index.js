@@ -16,7 +16,7 @@ export default class CharacterRenderer extends Component {
 
   componentDidMount() {
     console.log(this.rootRef.current);
-    const WIDTH = 700;
+    const WIDTH = this.rootRef.current.clientWidth;
     const HEIGHT = 500;
 
     const scene = new THREE.Scene();
