@@ -6,11 +6,11 @@ export const SET_BULK_DEFINITIONS = 'Set bulk definitions';
 export default function definitionsReducer(state = {}, { type, payload }) {
   switch (type) {
     case SET_BULK_DEFINITIONS: {
-      const filteded = pickBy(payload, defs => defs);
+      const filtered = pickBy(payload, defs => defs);
 
       return {
         ...state,
-        ...filteded
+        ...filtered
       };
     }
 

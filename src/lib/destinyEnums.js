@@ -3,6 +3,13 @@ export const HUNTER = 1;
 export const WARLOCK = 2;
 export const NO_CLASS = 3;
 
+export const MALE = 0;
+export const FEMALE = 1;
+
+export const HUMAN = 0;
+export const AWOKEN = 1;
+export const EXO = 2;
+
 export const FILTER_SHOW_COLLECTED = 'showCollected';
 export const FILTER_SHOW_PS4_EXCLUSIVES = 'ps4Exclusives';
 
@@ -20,6 +27,16 @@ export const MODS1 = 56;
 export const MODS2 = 59;
 export const CLAN_BANNER = 58;
 export const DUMMIES = 3109687656;
+
+export const BUCKET_ARMOR_HEAD = 3448274439;
+export const BUCKET_ARMOR_ARMS = 3551918588;
+export const BUCKET_ARMOR_CHEST = 14239492;
+export const BUCKET_ARMOR_LEGS = 20886954;
+export const BUCKET_ARMOR_CLASS_ITEM = 1585787867;
+export const BUCKET_WEAPON_KINETIC = 1498876634;
+export const BUCKET_WEAPON_ENERGY = 2465295065;
+export const BUCKET_WEAPON_POWER = 953998645;
+export const BUCKET_WEAPON_GHOST = 4023194814;
 
 export const WEAPON_MODS_ORNAMENTS = 3124752623;
 export const ARMOR_MODS_ORNAMENTS = 1742617626;
@@ -68,4 +85,15 @@ export const CLASSES = {
   [WARLOCK]: 'Warlock',
   [TITAN]: 'Titan',
   [HUNTER]: 'Hunter'
+};
+
+export const GENDERS = {
+  [MALE]: 'Male',
+  [FEMALE]: 'Female'
+};
+
+export const RACES = {
+  [HUMAN]: 'Human',
+  [AWOKEN]: 'Awoken',
+  [EXO]: 'Exo'
 };

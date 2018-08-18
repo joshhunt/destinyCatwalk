@@ -70,6 +70,10 @@ export const getItemClass = item => {
 export function getNameForItem(item, noQuotes) {
   let foundName;
 
+  if (!item) {
+    return null;
+  }
+
   if (item.displayProperties && item.displayProperties.name) {
     foundName = item.displayProperties.name;
   } else if (item.progressDescription) {

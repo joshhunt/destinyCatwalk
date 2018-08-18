@@ -23,6 +23,10 @@ $substituteColour = #494A4C
     background: rgba(#FAFAFA, 0)
     border-radius: 2px
 
+.reversed
+  flex-direction: row-reverse
+  text-align: right
+
 .collected
   composes: root
   color: #090B0E
@@ -36,6 +40,11 @@ $substituteColour = #494A4C
 
 .accessory
   margin-right: 10px
+
+  .reversed &
+    margin-right: 0
+    margin-left: 10px
+
 
 .icon
   height: $iconSize
@@ -52,12 +61,21 @@ $substituteColour = #494A4C
   font-size: 20px
 
 .main
-.name
-.itemType
+  margin-top: -3px
+
+.main
+.main > *
   white-space: nowrap
   overflow: auto
   text-overflow: ellipsis
+  margin-bottom: 4px
 
 .itemType
-  opacity: .75
-  font-size: .85em
+.itemMod
+  opacity: .9
+  font-size: .8em
+
+.itemModIcon
+  display: inline-block
+  height: 1em
+  // vertical-align: middle

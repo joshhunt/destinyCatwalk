@@ -1,2 +1,44 @@
+$triangleSize = 8px
+
 .root
   content: 'root'
+
+.characters
+  display: flex
+  margin: 0 -10px
+  justify-content: space-between
+
+.character
+  position: relative
+  flex: 0 0 auto
+  margin: 0 10px
+  text-decoration: none
+
+  &:after
+    content: ''
+    position: absolute
+    width: 100%
+    left: 0
+    right: 0
+    bottom: -6px
+    height: 2px
+    transition: all 150ms ease-in-out
+
+  &:before
+    content: ''
+    position: absolute
+    bottom: ($triangleSize * 2 + 6px) * -1
+    left: "calc(50% - (%s / 2))" % $triangleSize
+    border: $triangleSize solid transparent
+    transition: all 150ms ease-in-out
+
+.activeCharacter
+  &:after
+    height: 2px
+    background: #2ecc71
+
+  &:before
+    border-top-color: #2ecc71
+
+.equipmentView
+  margin-top: 50px

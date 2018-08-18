@@ -6,7 +6,7 @@ import inflate from 'file-loader!@destiny-item-manager/zip.js/WebContent/inflate
 import zipWorker from 'file-loader!@destiny-item-manager/zip.js/WebContent/z-worker.js'; // eslint-disable-line
 
 import { requireDatabase, getAllRecords } from './database';
-import { getDestiny } from './destiny';
+import { getDestiny } from 'src/lib/destiny';
 
 const db = new Dexie('destinyManifest');
 db.version(1).stores({
@@ -15,7 +15,7 @@ db.version(1).stores({
 });
 
 function fetchManifestDBPath() {
-  return getDestiny('/platform/Destiny2/Manifest/').then(data => {
+  return getDestiny('/Destiny2/Manifest/').then(data => {
     const englishUrl = data.mobileWorldContentPaths.en;
     return englishUrl;
   });
@@ -145,7 +145,7 @@ export function getAllDefinitions(progressCb) {
         return cachedData.data;
       }
 
-      progressCb({ updating: true });
+      progressCb && progressCb({ updating: true });
 
       return allDataFromRemote(dbPath).then(allData => {
         db.allData.put({ key: dbPath, data: allData });

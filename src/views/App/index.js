@@ -13,7 +13,7 @@ export default function App({ children }) {
   return (
     <div className={s.root}>
       <div className={s.header}>
-        <h1>clan.report</h1>
+        <h1>the catwalk</h1>
       </div>
 
       {children}
