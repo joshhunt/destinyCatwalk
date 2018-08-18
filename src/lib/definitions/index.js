@@ -110,8 +110,14 @@ function openDBFromBlob(SQLLib, blob) {
   });
 }
 
+let requireDatabasePromise;
+
 function allDataFromRemote(dbPath) {
-  return Promise.all([requireDatabase(), loadManifest(dbPath)])
+  if (!requireDatabasePromise) {
+    requireDatabasePromise = requireDatabase();
+  }
+
+  return Promise.all([requireDatabasePromise, loadManifest(dbPath)])
     .then(([SQLLib, manifestBlob]) => {
       console.log('Loaded both SQL library and manifest blob');
       return openDBFromBlob(SQLLib, manifestBlob);

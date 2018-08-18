@@ -240,6 +240,7 @@ export default class CharacterRenderer extends Component {
 
         mesh.scale.set(scale, scale, scale);
         mesh.rotation.x = -90 * toRadian;
+        mesh.rotation.z = -90 * toRadian;
 
         mesh.position.x += (bounds.min.x + width / 2) * scale;
         mesh.position.y += -(bounds.min.z + height / 2) * scale;

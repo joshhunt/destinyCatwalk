@@ -4,8 +4,14 @@ import sqlWasmBinaryPath from '!!file-loader!sql.js/js/sql-optimized-wasm-raw.wa
 function importAsmJs() {
   delete window.Module;
   delete window.SQL;
+
   console.log('Using asm.js SQLite');
-  return import(/* webpackChunkName: "sqlLib" */ 'sql.js');
+
+  if (!window.previousAsmJsPromise) {
+    window.previousAsmJsPromise = import(/* webpackChunkName: "sqlLib" */ 'sql.js');
+  }
+
+  return window.previousAsmJsPromise;
 }
 
 export function getAllRecords(db, table) {
@@ -45,6 +51,7 @@ export function requireDatabase() {
         return sqlWasmBinaryPath;
       }
     };
+
     window.SQL = {
       onRuntimeInitialized() {
         if (!loaded) {
