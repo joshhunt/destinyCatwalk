@@ -14,9 +14,14 @@ db.version(1).stores({
   allData: '&key, data'
 });
 
-function fetchManifestDBPath() {
+function fetchManifestDBPath(mode) {
   return getDestiny('/Destiny2/Manifest/').then(data => {
-    const englishUrl = data.mobileWorldContentPaths.en;
+    const englishUrl =
+      mode === 'mobileGearAssetDataBases'
+        ? data.mobileGearAssetDataBases[
+            data.mobileGearAssetDataBases.length - 1
+          ].path
+        : data.mobileWorldContentPaths.en;
     return englishUrl;
   });
 }
@@ -135,8 +140,8 @@ function allDataFromRemote(dbPath) {
     });
 }
 
-export function getAllDefinitions(progressCb) {
-  return fetchManifestDBPath()
+export function getAllDefinitions(progressCb, mode) {
+  return fetchManifestDBPath(mode)
     .then(dbPath => {
       return Promise.all([db.allData.get(dbPath), Promise.resolve(dbPath)]);
     })

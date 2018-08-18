@@ -24,8 +24,6 @@ export default function CharacterEquipment({ equipment, className }) {
 
   return (
     <div className={cx(className, s.root)}>
-      <CharacterRenderer />
-
       <div className={s.weapons}>
         <Item
           className={s.item}

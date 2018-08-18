@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import s from './styles.styl';
 
 const THREE = require('three');
+require('src/lib/TGXLoader');
+const OrbitControls = require('three-orbit-controls')(THREE);
 
 export default class CharacterRenderer extends Component {
   constructor(props) {
@@ -100,7 +102,7 @@ export default class CharacterRenderer extends Component {
       var intensity = gameLight.intensity ? gameLight.intensity : 1;
       var distance = gameLight.distance ? gameLight.distance : 0;
 
-      if (gameLight.visible != undefined && !gameLight.visible) continue;
+      if (gameLight.visible !== undefined && !gameLight.visible) continue;
 
       switch (gameLight.type) {
         case 'ambient':
@@ -155,50 +157,63 @@ export default class CharacterRenderer extends Component {
 
     this.rootRef.current.appendChild(renderer.domElement);
 
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.rotateSpeed = 2.0;
+    controls.zoomSpeed = 0.5;
+
+    controls.addEventListener('change', () => {
+      //console.log(controls);
+      this.render();
+    });
+
     this.renderer = renderer;
     this.scene = scene;
     this.camera = camera;
 
-    const itemHash = 3691881271; // Gjallarhorn
+    this.renderScene();
 
-    // Global Defaults
+    this.loadItem();
+  }
+
+  onLoadCallback = (...args) => {
+    console.log('onLoadCallback', ...args);
+  };
+  onProgressCallback = (...args) => {
+    console.log('onProgressCallback', ...args);
+  };
+  onErrorCallback = (...args) => {
+    console.log('onErrorCallback', ...args);
+  };
+
+  loadItem() {
+    const itemHash = 3691881271; // Sins of the Past
+
+    THREE.TGXLoader.Game = 'destiny2';
+    THREE.TGXLoader.Platform = 'mobile';
     THREE.TGXLoader.APIKey = process.env.REACT_APP_API_KEY; // https://www.bungie.net/en/Application
-    THREE.TGXLoader.APIBasepath = 'https://www.bungie.net/d1/Platform/Destiny'; // The basepath for making API requests
-    THREE.TGXLoader.Basepath = 'https://www.bungie.net'; // The basepath to load gear assets from
-    THREE.TGXLoader.Platform = 'web'; // Whether to use "web" or "mobile" gear assets (note the latter requires extra setup to use.
-    THREE.TGXLoader.ManifestPath = null; // The url for server-side manifest querying. Must include $itemHash
-    THREE.TGXLoader.NoCache = false; // Whether to force assets to ignore caching.
-
-    // Destiny 2 Global Defaults
-    THREE.TGXLoader.APIBasepath2 = 'https://www.bungie.net/Platform/Destiny2';
-    THREE.TGXLoader.ManifestPath2 = null;
-
-    // Instance options
-    new THREE.TGXLoader(
+    THREE.TGXLoader.DestinyInventoryItemDefinition = this.props.DestinyInventoryItemDefinition;
+    THREE.TGXLoader.DestinyGearAssetsDefinition = this.props.DestinyGearAssetsDefinition;
+    const loader = new THREE.TGXLoader(
       {
         itemHash: 0, // The itemHash to load (required)
-        classHash: 0, // The classHash to load
-        isFemale: false, // Whether to use male or female geometry sets (for Armor)
-        apiKey: THREE.TGXLoader.APIKey,
-        apiBasepath: THREE.TGXLoader.APIBasepath,
-        basepath: THREE.TGXLoader.Basepath,
-        platform: THREE.TGXLoader.Platform,
-        manifestPath: THREE.TGXLoader.ManifestPath,
-        loadTextures: true, // Whether textures should be loaded
-        loadSkeleton: false, // Whether the skeleton should be loaded (not implemented yet)
-        loadAnimation: false, // Whether the animation should be loaded (not implemented yet)
-        animationPath: THREE.TGXLoader.DefaultAnimationPath // The animation to load (not implemented yet)
+        game: 'destiny2',
+        apiBasepath: THREE.TGXLoader.APIBasepath2,
+        manifestPath2: THREE.TGXLoader.ManifestPath2
       },
-      onLoadCallback,
-      onProgressCallback,
-      onErrorCallback
+      this.onLoadCallback,
+      this.onProgressCallback,
+      this.onErrorCallback
     );
-    loader.load(itemHash, function(geometry, materials) {
+
+    loader.load(itemHash, (geometry, materials) => {
       console.log('LoadedItem', geometry, materials);
       const mesh = new THREE.Mesh(geometry, new THREE.MultiMaterial(materials));
       mesh.rotation.x = 90 * Math.PI / 180;
       mesh.scale.set(500, 500, 500);
-      scene.add(mesh);
+      this.scene.add(mesh);
+
+      this.renderScene();
     });
 
     this.renderScene();

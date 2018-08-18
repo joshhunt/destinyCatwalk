@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { getProfile } from 'src/store/clan';
 import Character from 'src/components/Character';
 import CharacterEquipment from 'src/components/CharacterEquipment';
+import CharacterRenderer from 'src/components/CharacterRenderer';
 
 import s from './styles.styl';
 
@@ -50,9 +51,22 @@ class UserPage extends Component {
     const { characterId: activeCharacterId } = this.props.routeParams;
     const currentCharacterEquipment = this.getCurrentCharacterEquipment();
 
+    const {
+      DestinyGearAssetsDefinition,
+      DestinyInventoryItemDefinition
+    } = this.props;
+
     return (
       <div className={s.root}>
         <h2>{this.renderName()}</h2>
+
+        {DestinyGearAssetsDefinition &&
+          DestinyInventoryItemDefinition && (
+            <CharacterRenderer
+              DestinyGearAssetsDefinition={DestinyGearAssetsDefinition}
+              DestinyInventoryItemDefinition={DestinyInventoryItemDefinition}
+            />
+          )}
 
         {profile && (
           <div className={s.characters}>
@@ -89,7 +103,10 @@ class UserPage extends Component {
 
 function mapStateToProps(state) {
   return {
-    lastProfile: state.clan.lastProfile
+    lastProfile: state.clan.lastProfile,
+    DestinyGearAssetsDefinition: state.gearAssets.DestinyGearAssetsDefinition,
+    DestinyInventoryItemDefinition:
+      state.definitions.DestinyInventoryItemDefinition
   };
 }
 

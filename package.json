@@ -39,7 +39,8 @@
     "redux-thunk": "^2.3.0",
     "reselect": "^3.0.1",
     "sql.js": "github:DestinyItemManager/sql.js",
-    "three": "^0.95.0"
+    "three": "^0.95.0",
+    "three-orbit-controls": "^82.1.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
