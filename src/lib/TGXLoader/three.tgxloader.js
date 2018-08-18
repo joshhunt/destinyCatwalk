@@ -115,7 +115,6 @@ Object.assign(THREE.TGXLoader.prototype, {
 
     function itemAsset(itemIndex, itemHash) {
       gearAsset(itemHash, function(item) {
-        //console.log('LoadedItem['+itemIndex+']', item);
         items[itemIndex] = item;
       });
     }
@@ -129,12 +128,11 @@ Object.assign(THREE.TGXLoader.prototype, {
       }
       shaders[shaderHash] = null;
       gearAsset(shaderHash, function(shader) {
-        //console.log('LoadedShader['+itemIndex+']', shader);
         shaders[shaderHash] = shader;
       });
     }
 
-    function gearAsset(/*itemIndex*/ itemHash, callback) {
+    function gearAsset(itemHash, callback) {
       const gearAsset = THREE.TGXLoader.DestinyGearAssetsDefinition[itemHash];
       console.log({
         defs: THREE.TGXLoader.DestinyGearAssetsDefinition,
@@ -163,12 +161,11 @@ Object.assign(THREE.TGXLoader.prototype, {
         options.shaderHashes && i < options.shaderHashes.length
           ? options.shaderHashes[i]
           : options.shaderHash;
-      //console.log('Item['+i+']', options.itemHashes[i], 'Shader', shaderHash);
       itemAsset(i, ornamentHash ? ornamentHash : itemHash);
       shaderAsset(i, shaderHash);
     }
   },
-  //parse: (function() {
+
   parse: function(items, shaders, options, onLoad, onProgress, onError) {
     var utils = THREE.TGXLoaderUtils;
 
@@ -252,8 +249,6 @@ Object.assign(THREE.TGXLoader.prototype, {
           function(gear) {
             gear = JSON.parse(utils.string(gear));
             gear.url = gearUrl;
-            //console.log('LoadGear', gearUrl);
-            //console.log(gear);
             contentLoaded.gear[gear.reference_id] = gear;
             assetLoadCount++;
             checkContentLoaded();
@@ -304,7 +299,6 @@ Object.assign(THREE.TGXLoader.prototype, {
       var filteredRegionIndexSets = [];
 
       if (content.dye_index_set) {
-        //console.log('DyeIndexSet', content.dye_index_set);
         filteredRegionIndexSets.push(content.dye_index_set);
       }
 
@@ -312,21 +306,7 @@ Object.assign(THREE.TGXLoader.prototype, {
         // Use gender neutral sets
         for (var setIndex in content.region_index_sets) {
           var regionIndexSet = content.region_index_sets[setIndex];
-          //console.log('RegionIndexSet', setIndex, regionIndexSet);
           var skipSet = false;
-          // regionKeysToNotLoad
-          //switch(parseInt(setIndex)) {
-          //  case 2: // hud
-          //  //case 4:
-          //  case 3:
-          //  case 6: // ammo
-          //  case 21: // reticle
-          //    skipSet = true;
-          //    break;
-          //  default:
-          //    console.warn('RegionSetIndex', setIndex);
-          //    break;
-          //}
           if (skipSet) continue;
           for (var j = 0; j < regionIndexSet.length; j++) {
             filteredRegionIndexSets.push(regionIndexSet[j]);
@@ -334,13 +314,12 @@ Object.assign(THREE.TGXLoader.prototype, {
         }
       } else if (content.female_index_set && content.male_index_set) {
         // Use gender-specific set (ie armor)
-        //console.log('GenderedIndexSet', content.female_index_set, content.male_index_set);
         filteredRegionIndexSets.push(
           isFemale ? content.female_index_set : content.male_index_set
         );
       } else {
         // This is probably a shader
-        //console.warn('NoIndexSetFound['+i+']', content);
+        // console.warn('NoIndexSetFound['+i+']', content);
       }
 
       // Build Asset Index Table
@@ -360,6 +339,7 @@ Object.assign(THREE.TGXLoader.prototype, {
           );
           continue;
         }
+
         // Shaders don't have geometry
         if (filteredRegionIndexSet.geometry) {
           for (i = 0; i < filteredRegionIndexSet.geometry.length; i++) {
@@ -367,10 +347,12 @@ Object.assign(THREE.TGXLoader.prototype, {
             geometryIndexes[index] = index;
           }
         }
+
         for (i = 0; i < filteredRegionIndexSet.textures.length; i++) {
           index = filteredRegionIndexSet.textures[i];
           textureIndexes[index] = index;
         }
+
         // Web only
         if (filteredRegionIndexSet.plate_regions) {
           for (i = 0; i < filteredRegionIndexSet.plate_regions.length; i++) {
@@ -378,6 +360,7 @@ Object.assign(THREE.TGXLoader.prototype, {
             platedTextureIndexes[index] = index;
           }
         }
+
         // Apparently there are shaders?
         if (filteredRegionIndexSet.shaders) {
           console.warn(
@@ -397,7 +380,6 @@ Object.assign(THREE.TGXLoader.prototype, {
 
       // Remember everything for later
       var contentRegions = {
-        //indexSets: filteredRegionIndexSets,
         geometry: {},
         textures: {},
         platedTextures: {},
@@ -406,7 +388,6 @@ Object.assign(THREE.TGXLoader.prototype, {
 
       function loadGeometryLoop(geometryIndex) {
         loadGeometry(content.geometry[geometryIndex], function(geometry) {
-          //console.log('Geometry', geometry);
           contentLoaded.geometry[geometry.fileIdentifier] = geometry;
           contentRegions.geometry[geometryIndex] = geometry.fileIdentifier;
           assetLoadCount++;
@@ -507,12 +488,10 @@ Object.assign(THREE.TGXLoader.prototype, {
       loadPart(
         url,
         function(data) {
-          //console.log(data);
           var magic = utils.string(data, 0x0, 0x4); // TGXM
           var fileOffset = utils.uint(data, 0x8);
           var fileCount = utils.uint(data, 0xc);
           var fileIdentifier = utils.string(data, 0x10, 0x100);
-          //console.log(magic, version, fileOffset.toString(16), fileCount, fileIdentifier);
           if (magic !== 'TGXM') {
             console.error('Invalid TGX File', url);
             return;
@@ -527,7 +506,6 @@ Object.assign(THREE.TGXLoader.prototype, {
             var type = utils.uint(data, headerOffset + 0x104);
             var size = utils.uint(data, headerOffset + 0x108);
             var fileData = data.slice(offset, offset + size);
-            //console.log('file['+f+']', headerOffset.toString(16), name, offset.toString(16), size);
             if (name.indexOf('.js') !== -1) {
               // render_metadata.js
               fileData = JSON.parse(utils.string(fileData));
@@ -549,11 +527,11 @@ Object.assign(THREE.TGXLoader.prototype, {
             lookup: fileLookup,
             metadata: renderMetadata
           };
-          //console.log('LoadTGXBin', url);
-          //console.log(tgxBin);
+
           contentLoaded.tgxms[
             url.indexOf('.bin') !== -1 ? 'textures' : 'geometry'
           ][url.slice(url.lastIndexOf('/') + 1).split('.')[0]] = tgxBin;
+
           if (onLoad) onLoad(tgxBin);
         },
         onProgressCallback,
@@ -581,9 +559,9 @@ Object.assign(THREE.TGXLoader.prototype, {
         onProgressCallback,
         onErrorCallback
       );
+
       textureData.flipY = false;
       textureData.minFilter = THREE.LinearMipMapLinearFilter;
-      //textureData.magFilter = THREE.NearestFilter;
       textureData.wrapS = THREE.RepeatWrapping;
       textureData.wrapT = THREE.RepeatWrapping;
 
@@ -612,7 +590,6 @@ Object.assign(THREE.TGXLoader.prototype, {
       if (texture.indexOf('.bin') !== -1) {
         // Mobile texture
         loadTGXBin(url, function(tgxBin) {
-          //console.log('MobileTexture', tgxBin);
           contentLoaded.mobileTextures[referenceId] = {
             url: url,
             referenceId: referenceId,
@@ -625,7 +602,6 @@ Object.assign(THREE.TGXLoader.prototype, {
           function thisLoopFunction(fileIndex) {
             var textureFile = tgxBin.files[fileIndex];
             if (contentLoaded['textures'][textureFile.name] !== undefined) {
-              //console.warn('CachedTexture', textureFile);
               count++;
               if (count === total && onLoad)
                 onLoad(contentLoaded.mobileTextures[referenceId]);
@@ -633,7 +609,6 @@ Object.assign(THREE.TGXLoader.prototype, {
             }
             var textureData = loadMobileTexture(textureFile, function() {
               count++;
-              //console.log('MobileTexture['+referenceId+']', textureFile.name, textureData.image.src);
               if (count === total && onLoad)
                 onLoad(contentLoaded.mobileTextures[referenceId]);
             });
@@ -658,7 +633,6 @@ Object.assign(THREE.TGXLoader.prototype, {
       } else {
         var contentId = isPlated ? 'platedTextures' : 'textures';
         if (contentLoaded[contentId][referenceId] !== undefined) {
-          //console.warn('CachedTexture', contentId+'_'+referenceId);
           if (onLoad) onLoad(contentLoaded[contentId][referenceId]);
           return;
         }
@@ -667,7 +641,6 @@ Object.assign(THREE.TGXLoader.prototype, {
         var textureData = loader.load(
           url,
           function(texture) {
-            //console.log('Texture['+referenceId+']', textureData.image.src);
             if (onLoad) onLoad(texture);
           },
           onProgressCallback,
@@ -738,10 +711,6 @@ Object.assign(THREE.TGXLoader.prototype, {
       for (var i = 0; i < contentLoaded.items.length; i++) {
         parseItem(contentLoaded.items[i]);
       }
-      //for (var gearId in contentLoaded.gear) {
-      //  var gear = contentLoaded.gear[gearId];
-      //  parseGear(gear);
-      //}
 
       if (typeof onLoadCallback !== 'function') {
         console.warn('NoOnLoadCallback', geometry, materials, animation);
@@ -763,11 +732,9 @@ Object.assign(THREE.TGXLoader.prototype, {
       console.log('ParseItem', item, assetIndexSet);
 
       // Figure out which geometry should be loaded ie class, gender
-      //var geometryHashes = [], geometryTextures = {};
       var artContent = gear.art_content;
       var artContentSets = gear.art_content_sets;
       if (artContentSets && artContentSets.length > 1) {
-        //console.log('Requires Arrangement', artContentSets);
         for (var r = 0; r < artContentSets.length; r++) {
           var artContentSet = artContentSets[r];
           if (artContentSet.classHash === classHash) {
@@ -789,25 +756,14 @@ Object.assign(THREE.TGXLoader.prototype, {
         if (regions.length > 0) {
           for (var u = 0; u < regions.length; u++) {
             var region = regions[u];
-            //console.log('Region['+u+':'+region.region_index+']', region.pattern_list, regionIndexSet);
 
-            //if (region.pattern_list.length > 0) {
-            //var pattern = region.pattern_list[0]; // Always 1?
             if (region.pattern_list.length > 1) {
               console.warn('MultiPatternRegion[' + u + ']', region);
               // Weapon attachments?
             }
+
             for (var p = 0; p < region.pattern_list.length; p++) {
               var pattern = region.pattern_list[p];
-              //var patternIndex = regionIndexSet[p];
-
-              // TODO Figure out why this breaks on some models
-              //var patternTextures = [];
-              //for (var t=0; t<patternIndex.textures.length; t++) {
-              //  var textureIndex = patternIndex.textures[t];
-              //  var texture = assetIndexSet[0].textures[textureIndex];
-              //  patternTextures.push(texture);
-              //}
 
               artRegionPatterns.push({
                 hash: pattern.hash,
@@ -815,15 +771,8 @@ Object.assign(THREE.TGXLoader.prototype, {
                 patternIndex: p,
                 regionIndex: region.region_index,
                 geometry: pattern.geometry_hashes
-                //textures: patternTextures
               });
 
-              //console.log('Pattern['+u+':'+p+']', pattern, patternTextures);
-              //
-              //for (var h=0; h<pattern.geometry_hashes.length; h++) {
-              //  //geometryHashes.push(pattern.geometry_hashes[h]);
-              //  parseTextures(pattern.geometry_hashes[h], patternTextures);
-              //}
               break;
             }
           }
@@ -839,22 +788,14 @@ Object.assign(THREE.TGXLoader.prototype, {
             geometry: overrideArtArrangement.geometry_hashes,
             textures: [] // TODO Implement this later
           });
-          //for (var o=0; o<overrideArtArrangement.geometry_hashes.length; o++) {
-          //  //geometryHashes.push(overrideArtArrangement.geometry_hashes[o]);
-          //  parseTextures(overrideArtArrangement.geometry_hashes[o]);
-          //}
         }
       }
 
-      //console.log('GeometryHashes', geometryHashes);
-      //var geometryTextures = parseTextures(geometryHashes);
       var geometryTextures = parseTextures(artRegionPatterns);
 
       var gearDyes = parseGearDyes(gear, shaderGear);
-      //console.log('GearDyes', gearDyes);
 
       // Compress geometry into a single THREE.Geometry
-      //if (geometryHashes.length === 0) console.warn('NoGeometry');
       for (var a = 0; a < artRegionPatterns.length; a++) {
         var artRegionPattern = artRegionPatterns[a];
 
@@ -896,36 +837,21 @@ Object.assign(THREE.TGXLoader.prototype, {
             break;
         }
         if (skipRegion) continue;
-        //if (artRegionPattern.regionIndex !== 3) continue;
-        //if (artRegionPattern.regionIndex !== 25) continue;
 
         console.log('ArtRegion[' + a + ']', artRegionPattern);
-
-        //if (artRegionPattern.regionIndex !== 1) continue;
-        //for (var g=0; g<geometryHashes.length; g++) {
-        //  var geometryHash = geometryHashes[g];
 
         for (var g = 0; g < artRegionPattern.geometry.length; g++) {
           var geometryHash = artRegionPattern.geometry[g];
           var tgxBin = contentLoaded.geometry[geometryHash];
 
-          //if (g !== 0) continue;
-          //if (g !== 1) continue;
           if (tgxBin === undefined) {
             console.warn('MissingGeometry[' + g + ']', geometryHash);
             continue;
           }
 
-          //console.log('Geometry['+g+']', geometryHash, tgxBin);
-
-          //var renderMeshes = parseTGXAsset(tgxBin, geometryHash);
-
           parseGeometry(geometryHash, geometryTextures, gearDyes);
         }
       }
-
-      //geometry.mergeVertices();
-      //geometry.computeVertexNormals();
     }
 
     //function parseTextures(geometryHashes) {
@@ -934,8 +860,6 @@ Object.assign(THREE.TGXLoader.prototype, {
       var canvasPlates = {};
       var geometryTextures = [];
 
-      //for (var g=0; g<geometryHashes.length; g++) {
-      //var geometryHash = geometryHashes[g];
       for (var a = 0; a < artRegionPatterns.length; a++) {
         var artRegionPattern = artRegionPatterns[a];
 
@@ -952,10 +876,7 @@ Object.assign(THREE.TGXLoader.prototype, {
           var metadata = tgxBin.metadata;
           var texturePlates = metadata.texture_plates;
 
-          //console.log('Metadata['+geometryHash+']', tgxBin);
-
           // Spasm.TGXAssetLoader.prototype.getGearRenderableModel
-          //console.log('TexturePlates['+g+']', texturePlates);
           if (texturePlates.length === 1) {
             var texturePlate = texturePlates[0];
             var texturePlateSet = texturePlate.plate_set;
@@ -967,7 +888,6 @@ Object.assign(THREE.TGXLoader.prototype, {
               var texturePlate = texturePlateSet[texturePlateId];
               var texturePlateRef =
                 texturePlateId + '_' + texturePlate.plate_index;
-              //var texturePlateRef = geometryHash+'_'+texturePlateId+'_'+texturePlate.plate_index;
 
               var textureId = texturePlateId;
               switch (texturePlateId) {
@@ -1000,14 +920,8 @@ Object.assign(THREE.TGXLoader.prototype, {
                   texturePlate.plate_size[0];
               }
 
-              if (texturePlate.texture_placements.length === 0) {
-                //console.warn('SkippedEmptyTexturePlate['+texturePlateId+'_'+texturePlate.plate_index+']');
-                //continue;
-              }
-
               var canvasPlate = canvasPlates[texturePlateRef];
               if (!canvasPlate) {
-                //console.log('NewTexturePlacementCanvas['+texturePlateRef+']');
                 canvas = document.createElement('canvas');
                 canvas.width = texturePlate.plate_size[0];
                 canvas.height = texturePlate.plate_size[1];
@@ -1034,10 +948,7 @@ Object.assign(THREE.TGXLoader.prototype, {
                 var placement = texturePlate.texture_placements[p];
                 var placementTexture =
                   contentLoaded.textures[placement.texture_tag_name];
-                //VertexColorsent);
 
-                // Fill draw area with white in case there are textures with an alpha channel
-                //ctx.fillRect(placement.position_x*scale, placement.position_y*scale, placement.texture_size_x*scale, placement.texture_size_y*scale);
                 // Actually it looks like the alpha channel is being used for masking
                 ctx.clearRect(
                   placement.position_x * scale,
@@ -1097,11 +1008,9 @@ Object.assign(THREE.TGXLoader.prototype, {
           if (geometryTextures[geometryHash] === undefined) {
             geometryTextures[geometryHash] = {};
           }
-          //if (geometryTextures[geometryHash][canvasPlate.plateId] !== undefined) {
           if (
             geometryTextures[geometryHash][canvasPlate.textureId] !== undefined
           ) {
-            //console.warn('OverridingTexturePlate['+geometryHash+':'+canvasPlate.plateId+']', geometryTextures[geometryHash][canvasPlate.plateId]);
             console.warn(
               'OverridingTexturePlate[' +
                 geometryHash +
@@ -1113,7 +1022,6 @@ Object.assign(THREE.TGXLoader.prototype, {
             continue;
           }
           var texture = contentLoaded.platedTextures[canvasPlateId].texture;
-          //geometryTextures[geometryHash][canvasPlate.plateId] = texture;
           geometryTextures[geometryHash][canvasPlate.textureId] = texture;
         }
       }
@@ -1161,11 +1069,6 @@ Object.assign(THREE.TGXLoader.prototype, {
       var tgxBin = contentLoaded.geometry[geometryHash];
       var renderMeshes = parseTGXAsset(tgxBin, geometryHash);
 
-      //console.log('ParseGeometry', geometryHash, geometryTextures, gearDyes, materials.length);
-
-      //if (geometryHash !== '1780854371-0') return;
-
-      //console.log('RenderMeshes', renderMeshes);
       var gearDyeSlotOffsets = [];
 
       if (loadTextures) {
@@ -1178,30 +1081,14 @@ Object.assign(THREE.TGXLoader.prototype, {
           for (var j = 0; j < 2; j++) {
             var materialParams = {
               game: game,
-              //side: THREE.DoubleSide,
-              //overdraw: true,
               skinning: hasBones,
-              //color: 0x777777,
-              //emissive: 0x444444,
               usePrimaryColor: j === 0,
               envMap: null
             };
-            //materialParams.envMap = contentLoaded.textures[DEFAULT_CUBEMAP].texture;
             for (var textureId in geometryTextures[geometryHash]) {
               var texture = geometryTextures[geometryHash][textureId];
 
               materialParams[textureId] = texture;
-              //
-              ////if (j === 0) logTexture(textureId, texture);
-              //
-              //switch(textureId) {
-              //  case 'diffuse': materialParams.map = texture; break;
-              //  case 'normal': materialParams.normalMap = texture; break;
-              //  case 'gearstack': materialParams.gearstackMap = texture; break;
-              //  default:
-              //    console.warn('UnknownGeometryTexture', textureId);
-              //    break;
-              //}
             }
 
             copyGearDyeParams(gearDye, materialParams);
@@ -1211,7 +1098,6 @@ Object.assign(THREE.TGXLoader.prototype, {
             material.name =
               geometryHash + '-' + (j === 0 ? 'Primary' : 'Secondary') + i;
             materials.push(material);
-            //console.log('MaterialName:'+material.name);
           }
         }
       }
@@ -1227,9 +1113,6 @@ Object.assign(THREE.TGXLoader.prototype, {
         var texcoordScale = renderMesh.texcoordScale;
         var parts = renderMesh.parts;
 
-        //if (m !== 0) continue;
-        //if (m !== 1) continue;
-
         if (parts.length === 0) {
           console.log(
             'Skipped RenderMesh[' + geometryHash + ':' + m + ']: No parts'
@@ -1237,24 +1120,12 @@ Object.assign(THREE.TGXLoader.prototype, {
           continue;
         } // Skip meshes with no parts
 
-        //console.log('RenderMesh['+m+']', renderMesh);
-
         // Spasm.Renderable.prototype.render
         var partCount = -1;
         for (var p = 0; p < parts.length; p++) {
           var part = parts[p];
 
           if (!checkRenderPart(part)) continue;
-
-          // Ghost Shell Eye Bg
-          //if (m !== 0) continue;
-          //if (p !== 3) continue;
-
-          //if (m !== 0) continue;
-          //if (p <6) continue;
-
-          // Phoenix Strife Type 0 - Feathers
-          //if (m !== 1 && p !== 1) continue;
 
           console.log(
             'RenderMeshPart[' + geometryHash + ':' + m + ':' + p + ']',
@@ -1271,23 +1142,15 @@ Object.assign(THREE.TGXLoader.prototype, {
           var materialIndex =
             gearDyeSlotOffsets[gearDyeSlot] + (part.usePrimaryColor ? 0 : 1);
 
-          //console.log('RenderMeshPart['+geometryHash+':'+m+':'+p+']', part);
-
           // Load Material
           if (loadTextures) {
             var textures = geometryTextures[geometryHash];
-            if (!textures) {
-              //console.warn('NoGeometryTextures['+geometryHash+']', part);
-            } else {
-              //continue;
-            }
             var material = parseMaterial(part, gearDyes[gearDyeSlot], textures);
 
             if (material) {
               material.name = geometryHash + '-CustomShader' + m + '-' + p;
               materials.push(material);
               materialIndex = materials.length - 1;
-              //console.log('MaterialName['+materialIndex+']:'+material.name);
             }
           }
 
@@ -1343,20 +1206,8 @@ Object.assign(THREE.TGXLoader.prototype, {
               faceVertexUvs.push(new THREE.Vector2(uvu, uvv));
 
               if (color) {
-                //console.log('Color['+m+':'+p+':'+i+':'+j+']', color);
                 faceColors.push(new THREE.Color(color[0], color[1], color[2]));
               }
-
-              //if (p === 10) {
-              //  console.log('Vertex['+j+']', index, vertex);
-              //}
-
-              //console.log(
-              //  uv[0]+','+uv[1],
-              //  texcoordScale[0]+'x'+texcoordScale[1],
-              //  texcoordOffset[0]+','+texcoordOffset[1],
-              //  detailUv[0]+','+detailUv[1]
-              //);
 
               detailVertexUvs.push(
                 new THREE.Vector2(uvu * detailUv[0], uvv * detailUv[1])
@@ -1375,29 +1226,27 @@ Object.assign(THREE.TGXLoader.prototype, {
 
             if (geometry.faceVertexUvs.length < 2)
               geometry.faceVertexUvs.push([]);
-            //geometry.faceVertexUvs[1].push(detailVertexUvs);
           }
         }
-
-        //return;
 
         for (var v = 0; v < vertexBuffer.length; v++) {
           var vertex = vertexBuffer[v];
           var position = vertex.position0;
-          var x = position[0]; //*positionScale[0]+positionOffset[0];
-          var y = position[1]; //*positionScale[1]+positionOffset[1];
-          var z = position[2]; //*positionScale[2]+positionOffset[2]; // Apply negative scale to fix lighting
+          var x = position[0];
+          var y = position[1];
+          var z = position[2];
+
           if (platform === 'web') {
             // Ignored on mobile?
             x = x * positionScale[0] + positionOffset[0];
             y = y * positionScale[1] + positionOffset[1];
             z = z * positionScale[2] + positionOffset[2];
           }
+
           geometry.vertices.push(new THREE.Vector3(x, y, z));
 
           // Set bone weights
-          var boneIndex = position[3]; //Math.abs((positionOffset[3] * 32767.0) + 0.01);
-          //var bone = geometry.bones[boneIndex];
+          var boneIndex = position[3];
 
           var blendIndices = vertex.blendindices0
             ? vertex.blendindices0
@@ -1470,13 +1319,7 @@ Object.assign(THREE.TGXLoader.prototype, {
     function parseMaterial(part, gearDye, geometryTextures) {
       var materialParams = {
         game: game,
-        //side: THREE.DoubleSide,
-        //overdraw: true,
         skinning: hasBones,
-        //color: 0x777777,
-        //emissive: 0x444444,
-        //envMap: dyeMaterial.envMap ? dyeMaterial.envMap : null,
-        //metalness: ,
         envMap: null,
         usePrimaryColor: part.usePrimaryColor
       };
@@ -1503,6 +1346,7 @@ Object.assign(THREE.TGXLoader.prototype, {
         gearstackMap: null,
         envMap: null
       };
+
       for (var textureId in geometryTextures) {
         textures[textureId] = geometryTextures[textureId];
       }
@@ -1516,35 +1360,13 @@ Object.assign(THREE.TGXLoader.prototype, {
 
         copyGearDyeParams(gearDye, materialParams);
 
-        //if (!(part.flags & 0x1)) {
-        //  materialParams.useDye = false;
-        //  console.warn('NoDye', part, gearDye);
-        //}
-        //console.warn('SlotTypeIndex', gearDye.slotTypeIndex);
-
-        //
-
         if (part.flags & 0x8) {
-          //materialParams.useDye = true;
           materialParams.useAlphaTest = true;
           console.warn('AlphaTest', part, gearDye);
         }
 
-        if (part.flags & 0x4) {
-          //materialParams.emissive = emissive;
-        }
-
         if (part.flags & ~(0x8 | 0x10 | 0x5)) {
           console.warn('UnknownFlags', part.flags);
-        }
-
-        if (part.flags & 0x20) {
-          //materialParams.color = color;
-          //materialParams.emissive = emissive;
-          //materialParams.color = 0xff0000;
-          //textureLookup.push('map');
-          //textures.normalMap = null;
-          //textures.gearstackMap = null;
         }
 
         // Worldline Zero hack fix
@@ -1590,23 +1412,10 @@ Object.assign(THREE.TGXLoader.prototype, {
             }
 
             if (part.flags & 0x10) {
-              //materialParams.color = color;
-              //materialParams.emissive = emissive;
-              //textures.map = null;
-              //textures.normalMap = null;
-              //textures.gearstackMap = null;
-
               switch (staticTextureIds.length) {
                 case 1:
                   textureLookup.push('cubeMap');
                   break;
-                //case 2:
-                //  materialParams.map = null;
-                //  textures.normalMap = null;
-                //  materialParams.gearstackMap = null;
-                //  textureLookup.push('detailEnvMap');
-                //  textureLookup.push('cubeMap');
-                //  break;
                 case 3:
                   materialParams.map = null;
                   materialParams.normalMap = null;
@@ -1631,19 +1440,8 @@ Object.assign(THREE.TGXLoader.prototype, {
                     : staticTextureContent
                 );
               }
-
-              //var staticTextureId = staticTextureIds[staticTextureIds.length-1];
-              //var staticTextureContent = contentLoaded.textures[staticTextureId];
-              //
-              //console.warn('CubeMapTexture', staticTextureContent ? staticTextureContent.referenceId : staticTextureContent);
-              //textureLookup.push('cubeMap');
             }
             break;
-          //case 8:
-          //  for (var textureId in textures) {
-          //    materialParams[textureId] = textures[textureId];
-          //  }
-          //  break;
           default:
             console.warn('UnknownShader', shader, part, gearDye);
             skipShader = true;
@@ -1674,8 +1472,6 @@ Object.assign(THREE.TGXLoader.prototype, {
             materialParams[textureId] = staticTexture;
           }
 
-          //console.log('MaterialParams', materialParams);
-
           return new THREE.TGXMaterial(materialParams);
         }
       } else {
@@ -1689,12 +1485,7 @@ Object.assign(THREE.TGXLoader.prototype, {
       var materialParams = {
         game: game,
         side: THREE.DoubleSide,
-        //overdraw: true,
         skinning: hasBones,
-        //color: 0x777777,
-        //emissive: 0x444444,
-        //envMap: dyeMaterial.envMap ? dyeMaterial.envMap : null,
-        //metalness: ,
         envMap: null,
         usePrimaryColor: part.usePrimaryColor,
         useAlphaTest: (part.flags & 0x8) !== 0
@@ -1714,6 +1505,7 @@ Object.assign(THREE.TGXLoader.prototype, {
           envMap: null
         };
       }
+
       if (textures.envMap === undefined) textures.envMap = null;
 
       if (part.shader) {
@@ -1730,14 +1522,11 @@ Object.assign(THREE.TGXLoader.prototype, {
           Math.random(),
           Math.random()
         );
-        //materialParams.color = color;
-        //materialParams.emissive = emissive;
 
         var override = false;
         var log = false;
         var textureLookup = [];
 
-        //var dyeColor = dyeMaterial.usePrimaryColor ? dyeMaterial.primaryColor : dyeMaterial.secondaryColor;
         console.log(
           'Shader',
           shader,
@@ -1746,108 +1535,11 @@ Object.assign(THREE.TGXLoader.prototype, {
           part.lodCategory
         );
 
-        if (part.flags & 0x20) {
-          //materialParams.transparent = true;
-          //materialParams.useAlphaTest = true;
-          //materialParams.transparent = true;
-          //materialParams.useAlphaTest = true;
-          //materialParams.emissive = emissive;
-          //override = true;
-        }
-
-        //if (shader.type === 8) {
-        //  copyGearDyeParams(gearDye, materialParams);
-        //  //materialParams.color = color;
-        //  //materialParams.emissive = emissive;
-        //  log = true;
-        //  override = true;
-        //
-        //  if (part.flags & 0x10) {
-        //    textureLookup.push('unknownMap');
-        //    textureLookup.push('map');
-        //  }
-        //}
-        //
-        //if (shader.type === 9) {
-        //  //materialParams.envMap = null;
-        //  copyGearDyeParams(gearDye, materialParams);
-        //  materialParams.color = color;
-        //  materialParams.emissive = emissive;
-        //  //log = true;
-        //  //override = true;
-        //}
-
-        // TODO I have no idea what these flags are for...
-        //if (!(part.flags & 0x1)) {
-        //  materialParams.color = color;
-        //  materialParams.emissive = 0x00ff00;
-        //  override = true;
-        //}
-        //if (!(part.flags & 0x4)) {
-        //  materialParams.color = color;
-        //  materialParams.emissive = 0xff00ff;
-        //  override = true;
-        //}
-        //if (!(part.flags & 0x5)) {
-        //  materialParams.color = color;
-        //  materialParams.emissive = 0xffff00;
-        //  override = true;
-        //}
         copyGearDyeParams(gearDye, materialParams);
-        for (var textureId in textures) {
-          //materialParams[textureId] = textures[textureId];
-        }
+
         if (part.flags & 0x8) {
-          // It Stared Back
-          //copyGearDyeParams(gearDye, materialParams);
-          //materialParams.color = color;
-          //materialParams.emissive = 0x00ffff;
-          //override = true;
-          //log = true;
-          //textureLookup.push('cubeMap2');
-          //materialParams.transparent = true;
           materialParams.useAlphaTest = true;
         }
-        if (part.flags & 0x10) {
-          //materialParams.map = textures.map;
-          //materialParams.normalMap = textures.normalMap;
-          //materialParams.gearstackMap = textures.gearstackMap;
-          //materialParams.color = materialParams.usePrimaryColor ? materialParams.primaryColor : materialParams.secondaryColor;
-          //materialParams.emissive = 0x0000ff;
-          //materialParams.transparent = true;
-          //materialParams.useAlphaTest = true;
-          if (staticTextureCount > 0) {
-            //materialParams.emissive = 0xff00ff;
-          }
-          //override = true;
-          //log = true;
-        }
-        if (part.flags & 0x20) {
-          // Decal
-          //materialParams.color = color;
-          //materialParams.emissive = 0x00ff00;
-          //override = true;
-          //log = true;
-        }
-        if (part.flags & 0x40) {
-          //materialParams.color = color;
-          //materialParams.emissive = 0xff0000;
-          //override = true;
-          //log = true;
-        }
-
-        //for (var textureId in textures) {
-        //  var texture = textures[textureId];
-        //  if (!texture) continue;
-        //  console.log("\t"+textureId+':', texture.name);
-        //}
-
-        //if (part.lodCategory.value === 2) {
-        //  materialParams.color = color;
-        //  materialParams.emissive = 0xff0000;
-        //  override = true;
-        //  log = true;
-        //}
 
         log = true;
 
@@ -1855,9 +1547,6 @@ Object.assign(THREE.TGXLoader.prototype, {
           case 7:
             if ((part.flags & 0x20) | 0x40) {
               // Decal
-              //materialParams.color = color;
-              //materialParams.emissive = emissive;
-              //override = true;
               switch (staticTextureCount) {
                 case 1:
                   materialParams.useDecal = true;
@@ -1866,13 +1555,7 @@ Object.assign(THREE.TGXLoader.prototype, {
               }
             } else if (part.flags & 0x10) {
               // Glow Decal?
-              //override = true;
               materialParams.useDecal = true;
-              //textureLookup.push('map');
-              //textureLookup.push('alphaMap');
-              //textureLookup.push('decalGlowMap');
-              //textureLookup.push('decalGlowMap');
-              //textureLookup.push('decalGlowMap');
               materialParams.color = color;
               materialParams.emissive = emissive;
             } else {
@@ -1883,343 +1566,24 @@ Object.assign(THREE.TGXLoader.prototype, {
                   textureLookup.push('map');
                   textureLookup.push('gearstackMap');
                   textureLookup.push('normalMap');
-                  //override = true;
                   materialParams.useDetail = false;
                   break;
                 case 5:
-                  //textureLookup.push('detailMap');
-                  //textureLookup.push('map');
-                  //textureLookup.push('gearstackMap');
-                  //textureLookup.push('normalMap');
-                  //textureLookup.push('detailNormalMap');
                   textureLookup.push('map');
                   textureLookup.push('detailMap');
                   textureLookup.push('normalMap');
                   textureLookup.push('detailNormalMap');
                   textureLookup.push('scratchMap');
-                  //override = true;
                   break;
               }
             }
             break;
         }
 
-        switch (/*shader.type*/ -1) {
-          case -1:
-            break;
-          case 7:
-            materialParams.map = textures.map;
-            materialParams.normalMap = textures.normalMap;
-            materialParams.gearstackMap = textures.gearstackMap;
-            materialParams.envMap = textures.envMap;
-            copyGearDyeParams(gearDye, materialParams);
-            override = staticTextureCount > 0;
-
-            materialParams.useAlphaTest = (part.flags & 0x8) !== 0;
-
-            //log = true;
-
-            switch (staticTextureCount) {
-              case 0:
-                //  //if (part.flags & 0x1) {
-                //  //  materialParams.color = color;
-                //  //  materialParams.emissive = emissive;
-                //  //  log = true;
-                //  //  override = true;
-                //  //}
-                break;
-              case 1:
-                if (part.flags & 0x40) {
-                  materialParams.map = null;
-                  materialParams.normalMap = null;
-                  materialParams.gearstackMap = null;
-                  textureLookup.push('detailDecalMap');
-                  override = true;
-                } else if (part.flags & 0x20) {
-                  // Decal
-                  //materialParams.color = color;
-                  //materialParams.emissive = emissive;
-                  textureLookup.push('detailDecalMap');
-                  log = true;
-                } else if (part.flags & 0x10) {
-                  // PinLight/Glow?
-                  // The Bandwagon
-                  materialParams.map = null;
-                  materialParams.normalMap = null;
-                  materialParams.gearstackMap = null;
-                  textureLookup.push('map');
-                  //materialParams.emissive = 0x00ff00;
-                  //log = true;
-                } /*if (part.flags & 0x10)*/ else {
-                  // Cubemap
-                  //materialParams.map = false;
-                  //materialParams.normalMap = false;
-                  //materialParams.gearstackMap = null;
-                  //textureLookup.push('cubeMap');
-                  //override = true;
-                  log = true;
-                }
-                //else {
-                //  materialParams.color = color;
-                //materialParams.emissive = emissive;
-                //  log = true;
-                //}
-                //log = true;
-                break;
-              case 2:
-                override = true;
-                // Sunbreaker (neckbit)
-                textureLookup.push('map');
-                textureLookup.push('normalMap');
-
-                materialParams.gearstackMap = null;
-                materialParams.detailMap = null;
-                materialParams.detailNormalMap = null;
-
-                //if (part.flags & 0x8) { // Detail Overlay?
-                //textureLookup.push('detailOverlayMap');
-                //textureLookup.push('detailOverlayMap'); // Dupe?
-
-                //}
-                //else {
-                //  materialParams.color = color;
-                //  materialParams.emissive = 0xFF0000;//emissive;
-                //  log = true;
-                //}
-                break;
-              case 3:
-                // TODO implement this effect
-                if (part.flags & 0x40) {
-                  // Sound and Fury
-                  materialParams.emissive = emissive;
-                  materialParams.map = null;
-                  materialParams.normalMap = null;
-                  //materialParams.envMap = null;
-                  textureLookup.push('map');
-                  textureLookup.push('normalMap');
-                  textureLookup.push('specularMap');
-                  log = true;
-                } else if (part.flags & 0x10) {
-                  // The Number (Liquid Bubble)
-                  //materialParams.color = color;
-                  //materialParams.emissive = emissive;
-                  //textureLookup.push('map'); // 4072752356_weapon_omolon_liquid_gradient_dif
-                  //textureLookup.push('alphaMap'); // 4072752356_weapon_omolon_liquid_bubbles_dif
-                  //textureLookup.push('cubeMap'); // 2690020957_default_monocrome_cubemap
-
-                  // Patience and Time netting
-                  textureLookup.push('map');
-                  textureLookup.push('alphaMap');
-                  textureLookup.push('normalMap');
-
-                  materialParams.map = null;
-                  materialParams.normalMap = null;
-                  materialParams.gearstackMap = null;
-                  materialParams.envMap = null;
-
-                  materialParams.useDye = false;
-                  //log = true;
-                } else {
-                  console.warn('UnknownShaderTypeLength', shader);
-                  materialParams.color = color;
-                  materialParams.emissive = emissive;
-                  log = true;
-                }
-                break;
-              case 5:
-                // D1 Sunbreaker (Gloves)
-                textureLookup.push('map');
-                textureLookup.push('detailMap');
-                textureLookup.push('normalMap');
-                textureLookup.push('detailNormalMap');
-                textureLookup.push('gearstackMap'); // scratchMap
-                override = true;
-                //log = true;
-                //if (part.flags & 0x10) { // Ghost Shell Eye
-                //  materialParams.color = color;
-                //  materialParams.emissive = emissive;
-                //  //materialParams.transparent = true;
-                //  //textureLookup.push('map');
-                //  //textureLookup.push('alphaMap');
-                //  //textureLookup.push('normalMap');
-                //  //textureLookup.push('gearstackMap');
-                //} else {
-                //  console.warn('UnknownShaderTypeLength', shader);
-                //  materialParams.color = color;
-                //  materialParams.emissive = emissive;
-                //  log = true;
-                //}
-                break;
-              default:
-                console.warn('UnknownShaderTypeLength', shader);
-                materialParams.color = color;
-                materialParams.emissive = emissive;
-                log = true;
-                break;
-            }
-            break;
-          case 8: // EmissiveMap
-            // Vex Mythoclast
-            //copyGearDyeParams(gearDye, materialParams);
-            //materialParams.color = color;
-            //materialParams.emissive = 0xffffff;//emissive;
-            //materialParams.emissive = this.usePrimaryColor ? this.primaryColor : this.secondaryColor;
-            //materialParams.emissiveIntensity = 1;
-            switch (staticTextureCount) {
-              case 0:
-                materialParams.emissive = emissive;
-                log = true;
-                break;
-              case 1:
-                textureLookup.push('emissiveMap');
-                break;
-              case 2:
-                textureLookup.push('alphaMap');
-                materialParams.useAlphaTest = true;
-                materialParams.transparent = true;
-                break;
-              default:
-                console.warn('UnknownShaderTypeLength', shader);
-                materialParams.color = color;
-                materialParams.emissive = emissive;
-                log = true;
-                break;
-            }
-            if (!(part.flags & 0x20)) {
-              console.warn('ShaderMissingEmissiveFlag_20', shader, part.flags);
-            }
-            if (part.flags & 0x10) {
-              //console.warn('ShaderHasUnknownEmissiveFlag_10', shader, part.flags);
-            }
-            if (part.flags & ~0x35) {
-              //console.warn('ShaderHasUnknownEmissiveFlags', shader, part.flags, part.flags & ~0x35);
-            }
-            override = true;
-            //log = true;
-            break;
-          case 9: // Cubemap/DetailNoise?
-            materialParams.map = textures.map;
-            materialParams.normalMap = textures.normalMap;
-            materialParams.gearstackMap = textures.gearstackMap;
-            copyGearDyeParams(gearDye, materialParams);
-            override = true;
-
-            //materialParams.color = color;
-            //materialParams.emissive = new THREE.Color(1.0, 0, 0, 1.0);
-
-            if (part.flags & 0x40) {
-              //materialParams.transparent = true;
-              //materialParams.useAlphaTest = true;
-              override = true;
-            }
-
-            switch (staticTextureCount) {
-              case 0:
-                //override = false;
-                break;
-              case 1:
-                textureLookup.push('cubeMap');
-                break;
-              case 2:
-                textureLookup.push('cubeMap');
-                textureLookup.push('detailEnvMap');
-                log = true;
-                break;
-              default:
-                console.warn('UnknownShaderTypeLength', shader);
-                materialParams.color = color;
-                materialParams.emissive = emissive;
-                log = true;
-                break;
-            }
-
-            //log = true;
-
-            if (part.flags & ~0x5) {
-              // Flags 5, 1, 0
-              console.warn(
-                'ShaderHasUnknownNoiseFlags',
-                shader,
-                part.flags,
-                part.flags & ~0x5
-              );
-            }
-
-            //log = true;
-            break;
-          case 11:
-            materialParams.map = textures.map;
-            materialParams.normalMap = textures.normalMap;
-            materialParams.gearstackMap = textures.gearstackMap;
-            copyGearDyeParams(gearDye, materialParams);
-            override = true;
-
-            //materialParams.useAlphaTest = true;
-            //if (part.flags & 0x1) {
-            //materialParams.transparent = true;
-            //materialParams.useAlphaTest = true;
-            //}
-
-            //logTexture(materialParams.map.name, materialParams.map);
-            //logTexture(materialParams.normalMap.name, materialParams.normalMap);
-            //logTexture(materialParams.gearstackMap.name, materialParams.gearstackMap);
-
-            switch (staticTextureCount) {
-              //case 0:
-              //  materialParams.emissive = emissive;
-              //  break;
-              case 2:
-                //textureLookup.push('cubeMap');
-                //textureLookup.push('cubeMap'); // Dupe?
-                textureLookup.push('detailNormalMap');
-                textureLookup.push('detailMap');
-                //materialParams.emissive = emissive;
-
-                //materialParams.gearstackMap = null;
-                //materialParams.detailMap = null;
-                //materialParams.detailNormalMap = null;
-                log = true;
-                break;
-              default:
-                console.warn('UnknownShaderTypeLength', shader, part.flags);
-                materialParams.color = color;
-                materialParams.emissive = emissive;
-                break;
-            }
-            //  materialParams.color = color;
-            //materialParams.emissive = emissive;
-            //  //copyGearDyeParams(gearDye, materialParams);
-            //  override = true;
-            break;
-          default:
-            console.warn('UnknownShaderType', shader);
-            //copyGearDyeParams(gearDye, materialParams);
-            //materialParams.color = color;
-            //materialParams.emissive = emissive;
-            //override = true;
-            break;
-        }
-
-        //if (part.flags & 0x5) { // Textured?
-        //if (part.flags & 0x1) { // Textured?
-        //if (!(part.flags & 0x1)) { // ??
-        //  materialParams.color = color;
-        //  materialParams.emissive = emissive;
-        //  override = true;
-        //}
-
-        //if (shader.type === 11) {
-        //  override = true;
-        //  //log = true;
-        //  materialParams.color = color;
-        //  materialParams.emissive = emissive;
-        //} else {
-        //log = false;
         if (!debugMode) {
           log = false;
           override = false;
         }
-        //}
 
         if (log) {
           console.log(
@@ -2242,12 +1606,6 @@ Object.assign(THREE.TGXLoader.prototype, {
             gearDye.secondaryColor,
             gearDye.wearColor
           ]);
-          //console.log(
-          //  "%c #"+new THREE.Color(gearDye.primaryColor).getHexString()
-          //  +" %c #"+new THREE.Color(gearDye.secondaryColor).getHexString(),
-          //  "border-left: 14px solid #"+new THREE.Color(gearDye.primaryColor).getHexString()+';',
-          //  "border-left: 14px solid #"+new THREE.Color(gearDye.secondaryColor).getHexString()+';'
-          //);
 
           for (var i = 0; i < staticTextureIds.length; i++) {
             var staticTextureId = staticTextureIds[i];
@@ -2293,16 +1651,13 @@ Object.assign(THREE.TGXLoader.prototype, {
           materialParams[textureId] = staticTexture;
         }
 
-        //console.log('MaterialParams', materialParams, "\n\n");
         console.log(
           'MaterialParamsAlphaTest',
           materialParams.useAlphaTest,
           part
         );
 
-        //if (!override) return false;
         return new THREE.TGXMaterial(materialParams);
-        //return new THREE.MeshPhongMaterial(materialParams);
       } else {
         console.warn('NoShader', part);
       }
@@ -2331,7 +1686,6 @@ Object.assign(THREE.TGXLoader.prototype, {
       var ctx = canvas.getContext('2d');
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, cubeSize, cubeSize);
-      //ctx.drawImage(texture.image, 0, 0);
       var offsets = [[0, 0], [0, 1], [1, 1], [2, 1], [3, 1], [0, 2]];
       var images = [];
       for (var i = 0; i < offsets.length; i++) {
@@ -2350,7 +1704,6 @@ Object.assign(THREE.TGXLoader.prototype, {
           );
         }
         var cubeFace = canvas.toDataURL('image/png');
-        //logImageSrc(cubeFace);
         images.push(cubeFace);
       }
 
@@ -2416,11 +1769,9 @@ Object.assign(THREE.TGXLoader.prototype, {
       var absBones = [];
       if (contentLoaded.skeleton) {
         var definition = contentLoaded.skeleton.definition;
-        //var transforms = definition.default_inverse_object_space_transforms;
         var inverseTransforms =
           definition.default_inverse_object_space_transforms;
         var transforms = definition.default_object_space_transforms;
-        //transforms = inverseTransforms;
         var nodes = definition.nodes;
 
         for (var n = 0; n < nodes.length; n++) {
@@ -2428,9 +1779,6 @@ Object.assign(THREE.TGXLoader.prototype, {
           var inverseTransform = inverseTransforms[n];
           var transform = transforms[n];
 
-          //if (n > 26) continue; // For now don't worry about fingers, facial rigs, etc
-
-          //var ts = transform.ts;
           var offset = transform.offset;
           var origin = transform.origin || [0, 0, 0]; // ts[0-2];
           var r = transform.r || [0, 0, 0, 1];
@@ -2451,15 +1799,7 @@ Object.assign(THREE.TGXLoader.prototype, {
 
           var absScale = new THREE.Vector3(scale.x, scale.y, scale.z);
 
-          if (n === 0) {
-            //euler.y = utils.degreesToRadian(-90);
-            //euler.set(utils.degreesToRadian(-90), 0, utils.degreesToRadian(-90));
-            //rotq.setFromEuler(euler);
-          }
-
           if (parentNode) {
-            //pos.set(parentNode.pos[0]-pos.x, parentNode.pos[1]-pos.y, parentNode.pos[2]-pos.z);
-
             absPos.x -= parentNode.pos[0];
             absPos.y -= parentNode.pos[1];
             absPos.z -= parentNode.pos[2];
@@ -2470,24 +1810,17 @@ Object.assign(THREE.TGXLoader.prototype, {
             absEuler.x -= parentEuler.x;
             absEuler.y -= parentEuler.y;
             absEuler.z -= parentEuler.z;
-            //absRotq.setFromEuler(absEuler);
 
             absRotq = absRotq.multiply(parentRotq.inverse());
           }
 
-          //if (n === 0 || n === 1 || n === 3 || n === 4 || n === 6)
-          if (n <= -1 /*26*/)
+          if (n <= -1)
             console.log(
               'Bone[' + n + ']',
               node.name.string + ':' + node.name.hash,
               node.parent_node_index,
               '\n' + 'pos: ' + pos.x + ', ' + pos.y + ', ' + pos.z,
               '\n' + 'apos: ' + absPos.x + ', ' + absPos.y + ', ' + absPos.z,
-              //"\n"+'lpos: '+logPos.x+', '+logPos.y+', '+logPos.z,
-              //"\n"+'ipos: '+inversePos.x+', '+inversePos.y+', '+inversePos.z,
-
-              //"\n"+'orotq: '+r[0]+', '+r[1]+', '+r[2]+', '+r[3],
-              //  "\n"+'rotq: '+rotq.x+','+rotq.y+','+rotq.z+','+rotq.w,
               '\n' +
                 'rot: ' +
                 Math.round(utils.radianToDegrees(euler.x)) +
@@ -2503,20 +1836,7 @@ Object.assign(THREE.TGXLoader.prototype, {
                 ', ' +
                 Math.round(utils.radianToDegrees(absEuler.z)),
 
-              //"\n"+'irot: '+Math.round(utils.radianToDegrees(inverseEuler.x))+', '+Math.round(utils.radianToDegrees(inverseEuler.y))+', '+Math.round(utils.radianToDegrees(inverseEuler.z)),
-              //"\n"+'lrot: '+Math.round(utils.radianToDegrees(logEuler.x))+', '+Math.round(utils.radianToDegrees(logEuler.y))+', '+Math.round(utils.radianToDegrees(logEuler.z)),
-              ////'rotq: '+r[0]+'/'+rotq.x+','+r[1]+'/'+rotq.y+','+r[2]+'/'+rotq.z+','+r[3]+'/'+rotq.w,
-              //'scale: '+s,
               '\n' + 'scale: ' + scale.x + ', ' + scale.y + ', ' + scale.z
-              //"\n"+'iscale: '+inverseScale.x+', '+inverseScale.y+', '+inverseScale.z
-              //  'origin: '+Math.round(offset[0]*100)+', '+Math.round(offset[1]*100)+', '+Math.round(offset[2]*100)
-              //origin,
-              //r,
-              //s,
-              //offset,
-              //pos,
-              //rotq,
-              //scale
             );
 
           bones.push({
@@ -2536,7 +1856,6 @@ Object.assign(THREE.TGXLoader.prototype, {
             scl: absScale.toArray()
           });
         }
-        //console.log('Bones', bones, absBones);
       }
       return absBones;
     }
@@ -2601,7 +1920,6 @@ Object.assign(THREE.TGXLoader.prototype, {
 
           var bone = bones[j];
 
-          //console.log('Frame['+i+'-'+j+']', translation, rotation, scale, bone);
           if (i === 0) {
             hierarchy.push({
               parent: bone.parent,
@@ -2651,7 +1969,6 @@ Object.assign(THREE.TGXLoader.prototype, {
 
           for (var dyeTextureId in dyeTextures) {
             var dyeTexture = dyeTextures[dyeTextureId];
-            //console.log('DyeTexture['+dyeTextureId+']', dyeTexture);
 
             if (
               dyeTexture.reference_id &&
@@ -2668,8 +1985,6 @@ Object.assign(THREE.TGXLoader.prototype, {
             }
           }
 
-          //console.log('DyeTextures', gearDyeTextures);
-
           // Spasm.GearDye
           var gearDye = {
             //identifier: dye.identifier, // Doesn't exist?
@@ -2685,12 +2000,10 @@ Object.assign(THREE.TGXLoader.prototype, {
               : null,
             decal: gearDyeTextures.decal ? gearDyeTextures.decal.texture : null,
 
-            // Not used?
-            //primaryColor: 0x000000,
             primaryDiffuse: gearDyeTextures.primary_diffuse
               ? gearDyeTextures.primary_diffuse.texture
               : null,
-            //secondaryColor: 0x000000,
+
             secondaryDiffuse: gearDyeTextures.secondary_diffuse
               ? gearDyeTextures.secondary_diffuse.texture
               : null,
@@ -2722,12 +2035,6 @@ Object.assign(THREE.TGXLoader.prototype, {
               gearDye.subsurfaceScatteringStrength =
                 dyeMat.subsurface_scattering_strength;
 
-              //var spec = dyeMat.specular_properties;
-              //gearDye.specular = new THREE.Color(spec[0], spec[0], spec[0]);
-              //gearDye.shininess = spec[1];
-              //gearDye.reflectivity = spec[1];
-              //gearDye.shininess = dye.material_properties.subsurface_scattering_strength[0];
-
               logColors([gearDye.primaryColor, gearDye.secondaryColor]);
               break;
             case 'destiny2':
@@ -2746,34 +2053,13 @@ Object.assign(THREE.TGXLoader.prototype, {
 
               var spec = dyeMat.specular_properties;
               console.log('MatSpecularParams', dyeMat.specular_properties);
-              //gearDye.specular = new THREE.Color(spec[0], spec[0], spec[0]);
-              //gearDye.shininess = spec[1];
-              //gearDye.specular = new THREE.Color(0xffffff);
-              //gearDye.shininess = 32;
 
               gearDye.detailDiffuseTransform = dyeMat.detail_diffuse_transform;
               gearDye.detailNormalTransform = dyeMat.detail_normal_transform;
 
-              // Physically Based Rendering
-              // emissive_pbr_params
-              // emissive_tint_color_and_intensity_bias
-              // lobe_pbr_params
-              // tint_pbr_params
-
-              //gearDye.metalness = 1;//dyeMat.tint_pbr_params[0];
-
-              //if (i === 0) gearDye.metalness = 0;
-
-              // spec_aa_xform
-
               gearDye.primaryParams = dyeMat.primary_material_params;
-              //gearDye.primaryParamsAdvanced = dyeMat.primary_material_advanced_params;
               gearDye.secondaryParams = dyeMat.secondary_material_params;
               gearDye.wornParams = dyeMat.worn_material_parameters;
-
-              //if (dyeMat.primary_material_advanced_params[0] === -1) {
-              //  gearDye.useDye = false;
-              //}
 
               console.warn(
                 'PrimaryMatParams',
@@ -2794,7 +2080,6 @@ Object.assign(THREE.TGXLoader.prototype, {
               break;
           }
 
-          //console.log(gearDye);
           gearDyes.push(gearDye);
         }
         gearDyeGroups[dyeType] = gearDyes;
@@ -2808,7 +2093,6 @@ Object.assign(THREE.TGXLoader.prototype, {
         : gearDyeGroups;
 
       console.log('GearDyes', gearDyeGroups);
-      //console.log('ShaderGearDyes', shaderDyeGroups);
 
       // Spasm.GearRenderable.prototype.getResolvedDyeList
       var resolvedDyes = [];
@@ -2829,10 +2113,7 @@ Object.assign(THREE.TGXLoader.prototype, {
         }
         for (var j = 0; j < dyes.length; j++) {
           var dye = dyes[j];
-          //console.log('DyeSlotIndex', j, dye.slotTypeIndex, dye);
-          //if (dyeType === 'lockedDyes' && ignoreLockedDyes && resolvedDyes[dye.slotTypeIndex]) continue;
           resolvedDyes[dye.slotTypeIndex] = dye;
-          //resolvedDyes[j] = dye;
         }
       }
 
@@ -2844,17 +2125,12 @@ Object.assign(THREE.TGXLoader.prototype, {
     // Spasm.TGXAssetLoader.prototype.getGearRenderableModel
     function parseTGXAsset(tgxBin, geometryHash) {
       var metadata = tgxBin.metadata; // Arrangement
-      //console.log('Metadata['+geometryHash+']', metadata);
 
       var meshes = [];
 
-      //for (var renderMeshIndex in metadata.render_model.render_meshes) {
       for (var r = 0; r < metadata.render_model.render_meshes.length; r++) {
         var renderMeshIndex = r;
         var renderMesh = metadata.render_model.render_meshes[renderMeshIndex]; // BoB Bunch of Bits
-
-        //console.log('RenderMesh['+renderMeshIndex+']', renderMesh);
-        //if (renderMeshIndex !== 0) continue;
 
         // IndexBuffer
         var indexBufferInfo = renderMesh.index_buffer;
@@ -2870,24 +2146,16 @@ Object.assign(THREE.TGXLoader.prototype, {
           var indexValue = utils.ushort(indexBufferData, j);
           indexBuffer.push(indexValue);
         }
-        //console.log('IndexBuffer', indexBufferInfo);
 
         // VertexBuffer
         var vertexBuffer = parseVertexBuffers(tgxBin, renderMesh);
-
-        // Spasm.RenderMesh.prototype.getRenderableParts
-        //console.log('RenderMesh['+renderMeshIndex+']',
-        //  "\n\tPartOffsets:", renderMesh.stage_part_offsets,
-        //  "\n\tPartList:", renderMesh.stage_part_list,
-        //  "\n\t", renderMesh);
 
         var parts = [];
         var partIndexList = [];
         var stagesToRender = [0, 7, 15]; // Hardcoded?
         var partOffsets = [];
 
-        var partLimit = renderMesh.stage_part_offsets[4]; //renderMesh.stage_part_list.length;
-        //var partLimit = renderMesh.stage_part_offsets[8];//renderMesh.stage_part_list.length;
+        var partLimit = renderMesh.stage_part_offsets[4];
         for (var i = 0; i < partLimit; i++) {
           partOffsets.push(i);
         }
@@ -2896,14 +2164,6 @@ Object.assign(THREE.TGXLoader.prototype, {
           var partOffset = partOffsets[i];
           var stagePart = renderMesh.stage_part_list[partOffset];
 
-          //if (stagesToRender.indexOf(partOffset) === -1) continue;
-
-          //console.log('StagePart['+renderMeshIndex+':'+partOffset+']',
-          //  "\n\tLOD:", stagePart.lod_category,
-          //  "\n\tShader:", stagePart.shader,
-          //  "\n\tFlags:", stagePart.flags,
-          //  "\n\tVariantShader:", stagePart.variant_shader_index
-          //);
           if (!stagePart) {
             console.warn(
               'MissingStagePart[' + renderMeshIndex + ':' + partOffset + ']'
@@ -2911,7 +2171,6 @@ Object.assign(THREE.TGXLoader.prototype, {
             continue;
           }
           if (partIndexList.indexOf(stagePart.start_index) !== -1) {
-            //console.warn('DuplicatePart['+renderMeshIndex+':'+partOffset, stagePart);
             continue;
           }
           partIndexList.push(stagePart.start_index);
@@ -2949,13 +2208,10 @@ Object.assign(THREE.TGXLoader.prototype, {
       var vertexBuffer = [];
 
       for (var vertexBufferIndex in renderMesh.vertex_buffers) {
-        //for (var j=0; renderMesh.vertex_buffers.length; j++) {
         var vertexBufferInfo = renderMesh.vertex_buffers[vertexBufferIndex];
         var vertexBufferData =
           tgxBin.files[tgxBin.lookup.indexOf(vertexBufferInfo.file_name)].data;
         var format = formats[vertexBufferIndex];
-
-        //console.log('VertexBuffer['+vertexBufferIndex+']', vertexBufferInfo.file_name, vertexBufferInfo, "\n"+'Elements', format);
 
         var vertexIndex = 0;
         for (
@@ -3050,13 +2306,6 @@ Object.assign(THREE.TGXLoader.prototype, {
                       count
                     );
                     vertexOffset += count * 4;
-                    //console.log(values);
-                    //console.log(floatArray());
-                    //for(j=0; j<count; j++) {
-                    //  value = utils.float(vertexBufferData, vertexOffset);
-                    //  values.push(value);
-                    //  vertexOffset += 4;
-                    //}
                     break;
                 }
                 break;
@@ -3097,8 +2346,6 @@ Object.assign(THREE.TGXLoader.prototype, {
       var gearDyeSlot = 0;
       var usePrimaryColor = true;
       var useInvestmentDecal = false;
-
-      //console.log('StagePart', stagePart);
 
       switch (stagePart.gear_dye_change_color_index) {
         case 0:
@@ -3141,46 +2388,34 @@ Object.assign(THREE.TGXLoader.prototype, {
       }
 
       var part = {
-        //externalIdentifier: stagePart.external_identifier,
-        //changeColorIndex: stagePart.gear_dye_change_color_index,
-        //primitiveType: stagePart.primitive_type,
-        //lodCategory: stagePart.lod_category,
         gearDyeSlot: gearDyeSlot,
         usePrimaryColor: usePrimaryColor,
         useInvestmentDecal: useInvestmentDecal
-        //indexMin: stagePart.index_min,
-        //indexMax: stagePart.index_max,
-        //indexStart: stagePart.start_index,
-        //indexCount: stagePart.index_count
       };
 
       for (var key in stagePart) {
         var partKey = key;
         var value = stagePart[key];
+
         switch (key) {
-          //case 'external_identifier': partKey = 'externalIdentifier'; break;
           case 'gear_dye_change_color_index':
             partKey = 'changeColorIndex';
             break;
-          //case 'primitive_type': partKey = 'primitiveType'; break;
-          //case 'lod_category': partKey = 'lodCategory'; break;
 
-          //case 'index_min': partKey = 'indexMin'; break;
-          //case 'index_max': partKey = 'indexMax'; break;
           case 'start_index':
             partKey = 'indexStart';
             break;
-          //case 'index_count': partKey = 'indexCount'; break;
 
           case 'shader':
             var staticTextures = value.static_textures;
+
             value = {
               type: value.type
             };
-            if (staticTextures) value.staticTextures = staticTextures;
-            break;
 
-          //case 'static_textures': partKey = 'staticTextures'; break;
+            if (staticTextures) value.staticTextures = staticTextures;
+
+            break;
 
           default:
             var keyWords = key.split('_');
@@ -3197,25 +2432,14 @@ Object.assign(THREE.TGXLoader.prototype, {
         part[partKey] = value;
       }
 
-      //if (stagePart.shader) {
-      //  var shader = stagePart.shader;
-      //  //console.log('StagePartShader', shader);
-      //  part.shader = shader.type;
-      //  part.staticTextures = shader.static_textures ? shader.static_textures : [];
-      //}
-
       return part;
     }
 
-    //return function(items, options, onLoad, onProgress, onError) {
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
       var shader = item.shaderHash ? shaders[item.shaderHash] : null;
-      //console.log('ParseGearAsset['+i+']', item, shader);
       loadAssetManifest(item);
       if (shader) loadAssetManifest(shader);
     }
-    //}
-    //})()
   }
 });

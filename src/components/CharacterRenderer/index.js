@@ -19,6 +19,7 @@ export default class CharacterRenderer extends Component {
   constructor(props) {
     super(props);
     this.rootRef = React.createRef();
+    this.state = { loading: true };
 
     this.itemHash = 3691881271; // Sins of the Past
   }
@@ -27,6 +28,7 @@ export default class CharacterRenderer extends Component {
     console.log(this.rootRef.current);
     const WIDTH = this.rootRef.current.clientWidth;
     const HEIGHT = 500;
+    this.setState({ height: HEIGHT });
 
     const scene = new THREE.Scene();
 
@@ -175,7 +177,15 @@ export default class CharacterRenderer extends Component {
 
     this.renderScene();
 
-    this.loadItem();
+    const buckets = keyBy(this.props.equipment.items, item => item.bucketHash);
+    const loadout = [
+      buckets[BUCKET_ARMOR_HEAD].itemHash,
+      buckets[BUCKET_ARMOR_ARMS].itemHash,
+      buckets[BUCKET_ARMOR_CHEST].itemHash,
+      buckets[BUCKET_ARMOR_LEGS].itemHash,
+      buckets[BUCKET_ARMOR_CLASS_ITEM].itemHash
+    ].forEach(itemHash => this.loadItem(itemHash));
+
     // this.loadItem(2158678429);
   }
 
@@ -210,47 +220,35 @@ export default class CharacterRenderer extends Component {
       this.onErrorCallback
     );
 
-    const buckets = keyBy(this.props.equipment.items, item => item.bucketHash);
-    const loadout = [
-      buckets[BUCKET_ARMOR_HEAD].itemHash,
-      buckets[BUCKET_ARMOR_ARMS].itemHash,
-      buckets[BUCKET_ARMOR_CHEST].itemHash,
-      buckets[BUCKET_ARMOR_LEGS].itemHash,
-      buckets[BUCKET_ARMOR_CLASS_ITEM].itemHash
-    ];
+    loader.load(itemHash, (geometry, materials) => {
+      const mesh = new THREE.Mesh(geometry, materials);
 
-    loader.load(
-      {
-        itemHashes: loadout
-      },
-      (geometry, materials) => {
-        const mesh = new THREE.Mesh(
-          geometry,
-          new THREE.MultiMaterial(materials)
-        );
+      mesh.geometry.computeBoundingBox();
+      const bounds = mesh.geometry.boundingBox;
 
-        mesh.geometry.computeBoundingBox();
-        const bounds = mesh.geometry.boundingBox;
+      let width = bounds.max.x - bounds.min.x;
+      let height = bounds.max.z - bounds.min.z;
 
-        let width = bounds.max.x - bounds.min.x;
-        let height = bounds.max.z - bounds.min.z;
+      const toRadian = Math.PI / 180;
+      const scale = 26;
 
-        const toRadian = Math.PI / 180;
-        const scale = 26;
+      mesh.scale.set(scale, scale, scale);
 
-        mesh.scale.set(scale, scale, scale);
-        mesh.rotation.x = -90 * toRadian;
-        mesh.rotation.z = -90 * toRadian;
+      mesh.rotation.x = -90 * toRadian;
+      mesh.rotation.z = -90 * toRadian;
 
-        mesh.position.x += (bounds.min.x + width / 2) * scale;
-        mesh.position.y += -(bounds.min.z + height / 2) * scale;
+      mesh.position.x += (bounds.min.x + width / 2) * scale;
+      mesh.position.y += -(bounds.min.z + height / 2) * scale;
 
-        this.scene.add(mesh);
+      this.scene.add(mesh);
 
+      this.renderScene();
+
+      setTimeout(() => {
         this.renderScene();
-        setTimeout(() => this.renderScene());
-      }
-    );
+        this.setState({ loading: false });
+      });
+    });
 
     this.renderScene();
   }
@@ -261,7 +259,12 @@ export default class CharacterRenderer extends Component {
 
   render() {
     return (
-      <div className={s.root}>
+      <div className={s.root} style={{ minHeight: this.state.height }}>
+        {this.state.loading && (
+          <div style={{ height: this.state.height }} className={s.loading}>
+            Loading...
+          </div>
+        )}
         <div ref={this.rootRef} />
       </div>
     );
