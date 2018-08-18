@@ -60,14 +60,6 @@ class UserPage extends Component {
       <div className={s.root}>
         <h2>{this.renderName()}</h2>
 
-        {DestinyGearAssetsDefinition &&
-          DestinyInventoryItemDefinition && (
-            <CharacterRenderer
-              DestinyGearAssetsDefinition={DestinyGearAssetsDefinition}
-              DestinyInventoryItemDefinition={DestinyInventoryItemDefinition}
-            />
-          )}
-
         {profile && (
           <div className={s.characters}>
             {Object.values(profile.characters.data).map(character => (
@@ -94,6 +86,18 @@ class UserPage extends Component {
               className={s.characterEquipment}
               equipment={currentCharacterEquipment}
             />
+
+            {DestinyGearAssetsDefinition &&
+              DestinyInventoryItemDefinition && (
+                <CharacterRenderer
+                  key={activeCharacterId}
+                  equipment={currentCharacterEquipment}
+                  DestinyGearAssetsDefinition={DestinyGearAssetsDefinition}
+                  DestinyInventoryItemDefinition={
+                    DestinyInventoryItemDefinition
+                  }
+                />
+              )}
           </div>
         )}
       </div>

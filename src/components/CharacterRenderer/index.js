@@ -1,4 +1,13 @@
 import React, { Component } from 'react';
+import { keyBy } from 'lodash';
+
+import {
+  BUCKET_ARMOR_HEAD,
+  BUCKET_ARMOR_ARMS,
+  BUCKET_ARMOR_CHEST,
+  BUCKET_ARMOR_LEGS,
+  BUCKET_ARMOR_CLASS_ITEM
+} from 'src/lib/destinyEnums';
 
 import s from './styles.styl';
 
@@ -110,13 +119,11 @@ export default class CharacterRenderer extends Component {
           light.shadow.mapSize.width = 1024;
           light.shadow.mapSize.height = 1024;
           light.shadow.camera.far = 100;
-          //lightHelper = new THREE.PointLightHelper(light, 30);
           break;
 
         case 'spot':
           light = new THREE.SpotLight(color, intensity, distance);
           if (gameLight.penumbra) light.penumbra = gameLight.penumbra;
-          //lightHelper = new THREE.SpotLightHelper(light);
           break;
 
         default:
@@ -203,17 +210,18 @@ export default class CharacterRenderer extends Component {
       this.onErrorCallback
     );
 
-    const item = this.props.DestinyInventoryItemDefinition[2158678429];
+    const buckets = keyBy(this.props.equipment.items, item => item.bucketHash);
+    const loadout = [
+      buckets[BUCKET_ARMOR_HEAD].itemHash,
+      buckets[BUCKET_ARMOR_ARMS].itemHash,
+      buckets[BUCKET_ARMOR_CHEST].itemHash,
+      buckets[BUCKET_ARMOR_LEGS].itemHash,
+      buckets[BUCKET_ARMOR_CLASS_ITEM].itemHash
+    ];
 
     loader.load(
       {
-        itemHashes: [
-          545021994, // helmet
-          2158678429, // robes
-          550583155, // arms
-          285537093, // boots
-          3620666320 // bond
-        ]
+        itemHashes: loadout
       },
       (geometry, materials) => {
         const mesh = new THREE.Mesh(
@@ -224,45 +232,11 @@ export default class CharacterRenderer extends Component {
         mesh.geometry.computeBoundingBox();
         const bounds = mesh.geometry.boundingBox;
 
-        const isArmor = item.itemCategoryHashes.includes(20);
-        const isShip = item.itemCategoryHashes.includes(42);
-        const isSparrow = item.itemCategoryHashes.includes(43);
-        const isGhost = item.itemCategoryHashes.includes(39);
-        const isSword = item.itemCategoryHashes.includes(54);
-
-        let scale = 100;
-
         let width = bounds.max.x - bounds.min.x;
         let height = bounds.max.z - bounds.min.z;
 
         const toRadian = Math.PI / 180;
-
-        mesh.rotation.z = -180 * toRadian;
-
-        if (isArmor) {
-          mesh.rotation.z = -120 * toRadian;
-          scale = 50;
-        }
-        if (isGhost) {
-          scale = 250;
-        }
-        if (isShip) {
-          scale = 4;
-          mesh.rotation.z = -120 * toRadian;
-        }
-        if (isSparrow) {
-          scale = 20;
-          mesh.rotation.z = -130 * toRadian;
-        }
-        if (isSword) {
-          mesh.rotation.y = 90 * 1.1 * toRadian;
-          mesh.rotation.z = 0;
-
-          width = bounds.max.z - bounds.min.z;
-          height = bounds.max.x - bounds.min.x;
-          //depth = bounds.max.y-bounds.min.y;
-          mesh.position.x -= width / 2 * 1.5 * scale;
-        }
+        const scale = 26;
 
         mesh.scale.set(scale, scale, scale);
         mesh.rotation.x = -90 * toRadian;
@@ -273,10 +247,7 @@ export default class CharacterRenderer extends Component {
         this.scene.add(mesh);
 
         this.renderScene();
-
-        setTimeout(() => {
-          this.renderScene();
-        });
+        setTimeout(() => this.renderScene());
       }
     );
 
