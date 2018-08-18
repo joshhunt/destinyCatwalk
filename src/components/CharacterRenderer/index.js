@@ -32,8 +32,9 @@ export default class CharacterRenderer extends Component {
 
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(30, WIDTH / HEIGHT, 0.1, 100000);
-    camera.position.z = 100;
+    const camera = new THREE.PerspectiveCamera(30, WIDTH / HEIGHT, 0.01, 10000);
+    camera.position.z = 4;
+    camera.position.y = 1;
     scene.add(camera);
 
     // Lights
@@ -163,8 +164,10 @@ export default class CharacterRenderer extends Component {
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 1, 0);
     controls.rotateSpeed = 2.0;
     controls.zoomSpeed = 0.5;
+    controls.update();
 
     controls.addEventListener('change', () => {
       //console.log(controls);
@@ -228,15 +231,15 @@ export default class CharacterRenderer extends Component {
       let height = bounds.max.z - bounds.min.z;
 
       const toRadian = Math.PI / 180;
-      const scale = 26;
+      // const scale = 26;
 
-      mesh.scale.set(scale, scale, scale);
+      // mesh.scale.set(scale, scale, scale);
 
       mesh.rotation.x = -90 * toRadian;
       mesh.rotation.z = -90 * toRadian;
 
       // mesh.position.x += width / 2 * scale;
-      // mesh.position.y += -(height / 2) * scale;
+      // mesh.position.y += -(height / 3) * scale;
 
       this.scene.add(mesh);
 
