@@ -49,7 +49,7 @@ export default class CharacterRenderer extends Component {
       name: 'FrontLight',
       type: 'point',
       color: 0xffffff,
-      intensity: 0.2,
+      intensity: 0.8,
       position: [50, 100, 300],
       parent: 'camera'
     };
