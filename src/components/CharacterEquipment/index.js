@@ -2,7 +2,6 @@ import React from 'react';
 import { keyBy } from 'lodash';
 import cx from 'classnames';
 
-import Item from 'src/components/Item';
 import {
   BUCKET_ARMOR_HEAD,
   BUCKET_ARMOR_ARMS,
@@ -15,6 +14,9 @@ import {
   BUCKET_WEAPON_GHOST
 } from 'src/lib/destinyEnums';
 
+import Item from 'src/components/Item';
+import CharacterRenderer from 'src/components/CharacterRenderer';
+
 import s from './styles.styl';
 
 export default function CharacterEquipment({ equipment, className }) {
@@ -22,6 +24,8 @@ export default function CharacterEquipment({ equipment, className }) {
 
   return (
     <div className={cx(className, s.root)}>
+      <CharacterRenderer />
+
       <div className={s.weapons}>
         <Item
           className={s.item}
