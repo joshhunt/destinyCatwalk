@@ -4,27 +4,15 @@ import { get } from 'lodash';
 import { connect } from 'react-redux';
 
 import BungieImage from 'src/components/BungieImage';
+import PlayerSearch from 'src/components/PlayerSearch';
 
 import s from './styles.styl';
 
-const k = (...args) => args.join('|');
-
-class App extends Component {
+class Home extends Component {
   render() {
-    const { memberships } = this.props;
     return (
       <div className={s.root}>
-        <h2>Choose platform</h2>
-        {memberships.map(ship => (
-          <Link
-            to={`/${ship.membershipType}/${ship.membershipId}`}
-            key={k(ship.membershipId, ship.membershipType)}
-            className={s.platformLink}
-          >
-            <BungieImage className={s.platformIcon} src={ship.iconPath} />{' '}
-            {ship.displayName}
-          </Link>
-        ))}
+        <PlayerSearch router={this.props.router} />
       </div>
     );
   }
@@ -38,4 +26,4 @@ function mapStateToProps(state) {
 
 const mapDispatchToActions = {};
 
-export default connect(mapStateToProps, mapDispatchToActions)(App);
+export default connect(mapStateToProps, mapDispatchToActions)(Home);

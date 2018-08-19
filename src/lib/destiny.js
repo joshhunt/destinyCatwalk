@@ -89,6 +89,19 @@ export function getClansForUser({ membershipType, membershipId }, accessToken) {
   );
 }
 
+export function trialsReportPlayerSearch(name, membershipType) {
+  const url = `https://elastic.destinytrialsreport.com/players/${membershipType}/${name}`;
+  return get(url);
+}
+
+export function searchBungiePlayer(name) {
+  return getDestiny(
+    `/Destiny2/SearchDestinyPlayer/-1/${encodeURIComponent(name)}/`
+  ).then(results => {
+    return results.map(r => ({ ...r, bungieResult: true }));
+  });
+}
+
 export function getClan(groupId, accessToken) {
   return getDestiny(`/GroupV2/${groupId}/`, { accessToken });
 }

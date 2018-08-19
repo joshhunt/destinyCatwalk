@@ -56,14 +56,12 @@ function Item({ className, item, shader, ornament, reversed }) {
       <div className={s.main}>
         <div className={s.name}>{name}</div>
         <div className={s.itemType}>{makeItemTypeName(item)}</div>
-
         {shader && (
           <div className={s.itemMod}>
             <BungieImage className={s.itemModIcon} src={shaderIcon} />{' '}
             {shaderName}
           </div>
         )}
-
         {ornament && (
           <div className={s.itemMod}>
             <BungieImage className={s.itemModIcon} src={ornamentIcon} />{' '}
