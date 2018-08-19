@@ -5,7 +5,6 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 
 import {
-  CLASSES,
   SHADER,
   WEAPON_MODS_ORNAMENTS,
   ARMOR_MODS_ORNAMENTS
