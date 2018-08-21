@@ -213,6 +213,7 @@ export default class CharacterRenderer extends Component {
       {
         itemHash: 0, // The itemHash to load (required)
         game: 'destiny2',
+        noCache: true,
         apiBasepath: THREE.TGXLoader.APIBasepath2,
         manifestPath2: THREE.TGXLoader.ManifestPath2
       },
@@ -223,6 +224,7 @@ export default class CharacterRenderer extends Component {
 
     loader.load(
       {
+        noCache: true,
         shaderHash: item.shaderHash,
         ornamentHash: item.ornamentHash,
         itemHash: item.itemHash
