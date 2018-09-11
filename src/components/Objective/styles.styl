@@ -1,0 +1,30 @@
+.root
+  display: block
+  position: relative
+  z-index: 1
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border: 1px solid grey
+  min-height: 22px
+  margin-bottom: 5px
+  padding: 2px 5px
+  width: 100%;
+
+.track
+  position: absolute
+  z-index: 2
+  height: 100%
+  left: 0
+  top: 0
+  bottom: 0
+  background: rgba(white, .2)
+
+.text
+  z-index: 3
+  display: flex
+
+.name
+  flex: 1
+  white-space: nowrap
+  text-overflow: ellipsis
+  overflow: hidden

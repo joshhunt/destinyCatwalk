@@ -13,6 +13,7 @@ import { getProfile } from 'src/store/clan';
 import Character from 'src/components/Character';
 import CharacterEquipment from 'src/components/CharacterEquipment';
 import CharacterRenderer from 'src/components/CharacterRenderer';
+import Triumphs from 'src/components/Triumphs';
 
 import s from './styles.styl';
 
@@ -73,7 +74,10 @@ class UserPage extends Component {
 
     const {
       DestinyGearAssetsDefinition,
-      DestinyInventoryItemDefinition
+      DestinyInventoryItemDefinition,
+      objectiveDefs,
+      recordDefs,
+      presentationNodeDefs
     } = this.props;
 
     const setup =
@@ -147,6 +151,15 @@ class UserPage extends Component {
               )}
           </div>
         )}
+
+        {profile && (
+          <Triumphs
+            profile={profile}
+            objectiveDefs={objectiveDefs}
+            recordDefs={recordDefs}
+            presentationNodeDefs={presentationNodeDefs}
+          />
+        )}
       </div>
     );
   }
@@ -157,7 +170,10 @@ function mapStateToProps(state) {
     lastProfile: state.clan.lastProfile,
     DestinyGearAssetsDefinition: state.gearAssets.DestinyGearAssetsDefinition,
     DestinyInventoryItemDefinition:
-      state.definitions.DestinyInventoryItemDefinition
+      state.definitions.DestinyInventoryItemDefinition,
+    objectiveDefs: state.definitions.DestinyObjectiveDefinition,
+    recordDefs: state.definitions.DestinyRecordDefinition,
+    presentationNodeDefs: state.definitions.presentationNodeDefs
   };
 }
 

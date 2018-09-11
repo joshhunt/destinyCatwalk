@@ -8,7 +8,7 @@ import store from './store';
 import App from './views/App';
 import Home from './views/Home';
 import UserPage from './views/UserPage';
-// import ClanPage from './views/ClanPage';
+import TriumphsPage from './views/TriumphsPage';
 
 export default class AppRouter extends Component {
   render() {
@@ -18,7 +18,11 @@ export default class AppRouter extends Component {
           <Route component={App}>
             <Route path="/" component={Home} />
 
-            {/*<Route path="/clan/:groupId" component={ClanPage} />*/}
+            <Route
+              path="/triumphs/:membershipType/:membershipId(/:presentationNodeHash)"
+              component={TriumphsPage}
+            />
+
             <Route
               path="/:membershipType/:membershipId(/:characterId)"
               component={UserPage}
